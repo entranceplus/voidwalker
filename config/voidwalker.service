@@ -1,0 +1,13 @@
+[Unit]
+Description=content server
+After=network.target
+
+[Service]
+WorkingDirectory=/root/voidwalker
+EnvironmentFile=-/var/myapp/env
+Environment="DATABASE_URL=jdbc:mysql://localhost/voidwalker?user=root&password="
+ExecStart=/usr/bin/java -jar /root/voidwalker/voidwalker.jar
+User=root
+
+[Install]
+WantedBy=multi-user.target

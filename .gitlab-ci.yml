@@ -1,0 +1,22 @@
+image: clojure:lein-2.7.0
+
+deploy:
+    only:
+        - master
+    script:
+        # Install gcloud
+        - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-150.0.0-linux-x86_64.tar.gz
+        - tar -xf google-cloud-sdk-150.0.0-linux-x86_64.tar.gz
+        - ./google-cloud-sdk/install.sh
+        - ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=entranceplus.json
+        - ./google-cloud-sdk/bin/gcloud config set compute/zone asia-east1-b
+        - ./google-cloud-sdk/bin/gcloud config set project tranquil-harbor-163720
+
+        # Prepare jar
+        - lein uberjar
+
+        # configure deployment
+        - ./google-cloud-sdk/bin/gcloud compute ssh instance-1 --zone asia-east1-b --command='mkdir -p voidwalker'
+        - ./google-cloud-sdk/bin/gcloud compute copy-files ./target/uberjar/voidwalker.jar  instance-1:~/voidwalker
+        - ./google-cloud-sdk/bin/gcloud compute copy-files ./config/*  instance-1:~/voidwalker/
+        - ./google-cloud-sdk/bin/gcloud compute ssh instance-1 --zone asia-east1-b --command='pwd && chmod a+x ./voidwalker/init.sh && ./voidwalker/init.sh'
