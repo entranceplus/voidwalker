@@ -9,6 +9,7 @@
 (korma/defentity users)
 
 (defn login-html []
+  (list
   [:h3 "Login"]
   [:form {:method "POST" :action "login"}
     [:div "Username:"
@@ -16,9 +17,10 @@
     [:div "Password:"
       [:input {:type "password" :name "password" :required "required"}]]
     [:div
-      [:input {:type "submit" :value "Log In"}]]])
+      [:input {:type "submit" :value "Log In"}]]]))
 
 (defn sighup-html []
+  (list
   [:h3 "SIGNUP"]
   [:form {:method "POST" :action "signup"}
     [:div "Username:"
@@ -26,7 +28,7 @@
     [:div "Password:"
       [:input {:type "password" :name "password" :required "required"}]]
     [:div
-      [:input {:type "submit" :value "sign up"}]]])
+      [:input {:type "submit" :value "sign up"}]]]))
 
 
 
