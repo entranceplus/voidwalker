@@ -52,7 +52,6 @@
                               (korma/where {:username username
                                             :password password}))]
     (when-not (seq userlist)
-       ;;(korma/insert users (korma/values user))
        (korma/select users (korma/where {:username username})))))
 
 
