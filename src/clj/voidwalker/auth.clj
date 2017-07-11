@@ -52,8 +52,8 @@
                               (korma/where {:username username
                                             :password password}))]
     (when-not (seq userlist)
-       (korma/insert users (korma/values user))
-       (korma/delete users (korma/where {:username username})))))
+       ;;(korma/insert users (korma/values user))
+       (korma/select users (korma/where {:username username})))))
 
 
 (defroutes auth-routes
