@@ -19,7 +19,7 @@ cp ./voidwalker/voidwalker.service /lib/systemd/system/voidwalker.service
 
 echo 'Starting service'
 export DATABASE_URL="jdbc:mysql://localhost/voidwalker?user=root&password="
-java -jar /root/voidwalker/voidwalker.jar migrate
+# java -jar /root/voidwalker/voidwalker.jar migrate
 systemctl daemon-reload
 systemctl enable voidwalker
 systemctl restart voidwalker
