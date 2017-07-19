@@ -53,7 +53,7 @@
                   :subprotocol "mysql"
                   :subname "//localhost/voidwalker"
                   :user "root"
-                  :password "mysqlroot"}}
+                  :password ""}}
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-immutant "2.1.0"]

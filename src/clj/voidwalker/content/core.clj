@@ -2,7 +2,8 @@
   (:require [clojure.string :as str]
             [compojure.core :refer [context defroutes GET POST]]
             [korma.core :as k]
-            [ring.util.http-response :as response]))
+            [ring.util.http-response :as response]
+            [voidwalker.db]))
 
 (k/defentity posts)
 

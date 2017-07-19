@@ -60,29 +60,13 @@
 (defroutes auth-routes
   (GET "/check" []
        (send-response (response/ok "Ok done")))
+
   (POST "/login" {{:keys [username password] :as user} :params}
        (if-not (nil? (handle-login user))
           (send-response (response/ok {:msg "you have not signed up. Please sign up before logging in "}))
           (send-response (response/ok {:msg "login successful"}))))
 
-
-
-
   (POST "/signup" {{:keys [username password] :as user} :params}
         (if-not (nil? (handle-signup user))
           (send-response (response/ok {:msg "Signed up"}))
           (send-response (response/ok {:msg "username is already taken. Please choose other username."})))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
