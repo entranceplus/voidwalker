@@ -55,7 +55,7 @@
                   :user "root"
                   :password ""}}
 
-  :plugins [[lein-cljsbuild "1.1.5"]
+  :plugins [[lein-cljsbuild "1.1.6"]
             [lein-immutant "2.1.0"]
             [lein-re-frisk "0.4.8"]]
   :clean-targets ^{:protect false}
@@ -76,13 +76,12 @@
                {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
                 :compiler
                 {:output-to "target/cljsbuild/public/js/app.js"
-                 :optimizations :none
+                 :optimizations :advanced
                  :pretty-print false
+                
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
                  :externs ["react/externs/react.js"]}}}}
-
-
              :aot :all
              :uberjar-name "voidwalker.jar"
              :source-paths ["env/prod/clj"]
