@@ -76,9 +76,8 @@
                {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
                 :compiler
                 {:output-to "target/cljsbuild/public/js/app.js"
-                 :optimizations :advanced
+                 :optimizations :whitespace
                  :pretty-print false
-                
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
                  :externs ["react/externs/react.js"]}}}}
@@ -118,9 +117,6 @@
                       :source-map true
                       :optimizations :none
                       :pretty-print true}}}}
-
-
-
                   :doo {:build "test"}
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]
