@@ -1,10 +1,7 @@
-<!DOCTYPE html>
 <html>
-  <head>
-      <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Welcome to voidwalker</title>
-    
+<head>
+<title>Voidwalker</title>
+
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
       <!-- Latest compiled and minified CSS -->
@@ -16,21 +13,10 @@
       <!-- Latest compiled and minified JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-      <!-- Include stylesheet -->
-      <link href="https://cdn.quilljs.com/1.2.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+<div id="app"></div>
 
-
-      <link href="/css/screen.css" rel="stylesheet" type="text/css">
-  </head>
-  <body>
-    
-    <div id="app" class="animation-container">
-      <div class="l-circle"></div>
-        <div class="l-circle-small"></div>
-        <div class="l-circle-big"></div>
-        <div class="l-circle-inner-inner"></div>
-        <div class="l-circle-inner"></div>
-    </div>
 
     <!-- scripts and styles -->
 
@@ -38,10 +24,7 @@
         var context = "{{servlet-context}}";
         var csrfToken = "{{csrf-token}}";
     </script>
-    {% script "/js/source.js" %}
-  </body>
+    {% script "/js/client.js" %}
+
+</body>
 </html>
-
-
-
-

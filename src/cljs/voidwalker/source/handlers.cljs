@@ -1,5 +1,5 @@
-(ns voidwalker.handlers
-  (:require [voidwalker.db :as db]
+(ns voidwalker.source.handlers
+  (:require [voidwalker.source.db :as db]
             [ajax.core :as ajax]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
             [day8.re-frame.http-fx]))

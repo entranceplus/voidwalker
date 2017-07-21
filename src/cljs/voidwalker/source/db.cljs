@@ -1,4 +1,4 @@
-(ns voidwalker.db)
+(ns voidwalker.source.db)
 
 (def default-db
   {:page :home

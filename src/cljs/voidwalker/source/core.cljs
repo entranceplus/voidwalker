@@ -1,4 +1,4 @@
-(ns voidwalker.core
+(ns voidwalker.source.core
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [secretary.core :as secretary]
@@ -6,13 +6,13 @@
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
-            [voidwalker.ajax :refer [load-interceptors!]]
-            [voidwalker.handlers]
+            [voidwalker.source.ajax :refer [load-interceptors!]]
+            [voidwalker.source.handlers]
             [accountant.core :as accountant]
             [cljsjs.quill]
-            [voidwalker.quill :as q]
+            [voidwalker.source.quill :as q]
             [clojure.core.async :as async]
-            [voidwalker.subscriptions]
+            [voidwalker.source.subscriptions]
             ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
             )
   (:import goog.History))

@@ -59,28 +59,37 @@
             [lein-immutant "2.1.0"]
             [lein-re-frisk "0.4.8"]]
   :clean-targets ^{:protect false}
-  [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
+  [:target-path
+   [:cljsbuild :builds :app :compiler :output-dir]
+   [:cljsbuild :builds :app :compiler :output-to]]
   :figwheel
   {:http-server-root "public"
    :nrepl-port 7002
    :css-dirs ["resources/public/css"]
    :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-
-
   :profiles
   {:uberjar {:omit-source true
-             :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
+             :prep-tasks ["compile" ["cljsbuild" "once" "min" "client"]]
              :cljsbuild
              {:builds
               {:min
-               {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
+               {:source-paths ["src/cljc" "src/cljs.source" "env/prod/cljs/source"]
                 :compiler
-                {:output-to "target/cljsbuild/public/js/app.js"
+                {:output-to "target/cljsbuild/public/js/source.js"
                  :optimizations :whitespace
                  :pretty-print false
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
-                 :externs ["react/externs/react.js"]}}}}
+                 :externs ["react/externs/react.js"]}}}
+              :client
+              {:source-paths ["src/cljc" "src/cljs/client" "env/prod/cljs/client"]
+               :compiler
+               {:output-to "target/cljsbuild/public/js/client.js"
+                :optimizations :advanced
+                :pretty-print false
+                :closure-warnings
+                {:externs-validation :off :non-standard-jsdoc :off}
+                :externs ["react/externs/react.js"]}}}
              :aot :all
              :uberjar-name "voidwalker.jar"
              :source-paths ["env/prod/clj"]
@@ -106,14 +115,25 @@
                                  [org.clojure/clojurescript "1.9.562"]]
                   :cljsbuild
                   {:builds
-                   {:app
-                    {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-                     :figwheel {:on-jsload "voidwalker.core/mount-components"}
+                   {:source
+                    {:source-paths ["src/cljs/voidwalker/source" "src/cljc" "env/dev/cljs/voidwalker/source"]
+                     :figwheel {:on-jsload "voidwalker.source.core/mount-components"}
                      :compiler
-                     {:main "voidwalker.app"
-                      :asset-path "/js/out"
-                      :output-to "target/cljsbuild/public/js/app.js"
-                      :output-dir "target/cljsbuild/public/js/out"
+                     {:main "voidwalker.source.app"
+                      :asset-path "/js/out/source"
+                      :output-to "target/cljsbuild/public/js/source.js"
+                      :output-dir "target/cljsbuild/public/js/out/source"
+                      :source-map true
+                      :optimizations :none
+                      :pretty-print true}}
+                    :client
+                    {:source-paths ["src/cljs/voidwalker/client" "src/cljc" "env/dev/cljs/voidwalker/client"]
+                     :figwheel {:on-jsload "voidwalker.client.core/mount-components"}
+                     :compiler
+                     {:main "voidwalker.client.app"
+                      :asset-path "/js/out/client"
+                      :output-to "target/cljsbuild/public/js/client.js"
+                      :output-dir "target/cljsbuild/public/js/out/client"
                       :source-map true
                       :optimizations :none
                       :pretty-print true}}}}

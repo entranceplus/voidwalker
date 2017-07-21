@@ -1,4 +1,4 @@
-(ns voidwalker.ajax
+(ns voidwalker.source.ajax
   (:require [ajax.core :as ajax]))
 
 (defn local-uri? [{:keys [uri]}]

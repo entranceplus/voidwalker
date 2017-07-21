@@ -1,4 +1,4 @@
-(ns voidwalker.subscriptions
+(ns voidwalker.source.subscriptions
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
 (reg-sub
