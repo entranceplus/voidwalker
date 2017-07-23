@@ -17,6 +17,7 @@
                  [venantius/accountant "0.2.0"]
                  [korma "0.4.3"]
                  [mysql/mysql-connector-java "6.0.5"]
+                 [cljsjs/slate "0.20.3-0"]
                  [mount "0.1.11"]
                  [migratus "0.9.7"]
                  [org.clojure/clojure "1.8.0"]
@@ -30,7 +31,7 @@
                  [org.webjars/bootstrap "4.0.0-alpha.5"]
                  [org.webjars/font-awesome "4.7.0"]
                  [re-frame "0.9.4"]
-                 [reagent "0.6.2"]
+                 [reagent "0.6.2" :exclusions [cljsjs/react cljsjs/react-dom]]
                  [reagent-utils "0.2.1"]
                  [ring-webjars "0.2.0"]
                  [ring/ring-core "1.6.1"]
@@ -124,6 +125,10 @@
                       :output-to "target/cljsbuild/public/js/source.js"
                       :output-dir "target/cljsbuild/public/js/out/source"
                       :source-map true
+                      :foreign-libs [{:file "public/js/bundle.js"
+                                      :provides ["cljsjs.react"
+                                                 "cljsjs.react.dom"
+                                                 "webpack.bundle"]}]
                       :optimizations :none
                       :pretty-print true}}
                     :client

@@ -1,0 +1,28 @@
+{
+  "name": "voidwalker",
+  "version": "0.0.1",
+  "description": "CMS",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "watch": "webpack -d --watch",
+    "build": "webpack -p"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/entrance-plus/voidwalker.git"
+  },
+  "author": "Akash Shakdwipeea <ashakdwipeea@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/entrance-plus/voidwalker/issues"
+  },
+  "homepage": "https://gitlab.com/entrance-plus/voidwalker#README",
+  "dependencies": {
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "slate": "^0.21.0",
+    "webpack": "^3.3.0"
+  }
+}

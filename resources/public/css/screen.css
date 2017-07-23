@@ -181,4 +181,11 @@ html,body{
 }
 
 
-/* for medium editor */
+/* for editor */
+#toolbar-panel {
+    background-color: "blue";
+}
+
+.input-area {
+    margin: 30px;
+}
