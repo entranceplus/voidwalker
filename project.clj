@@ -125,6 +125,7 @@
                       :output-to "target/cljsbuild/public/js/source.js"
                       :output-dir "target/cljsbuild/public/js/out/source"
                       :source-map true
+                      :source-map-path "js/out"
                       :foreign-libs [{:file "public/js/bundle.js"
                                       :provides ["cljsjs.react"
                                                  "cljsjs.react.dom"
