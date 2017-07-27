@@ -1,9 +1,7 @@
 (ns voidwalker.source.editor.schema)
 
 (defn element [e]
-  (println "element outer " e)
   (fn [props]
-    (println "element inner " (type props))
     (.createElement js/React
                     e
                     (.-attributes props)
@@ -13,14 +11,18 @@
   {:nodes {:list-item {:body (element "li")}
            :numbered-list {:body (element "ol")
                            :icon-name "format_list_numbered"}
+           :bulleted-list {:body (element "ul")
+                           :icon-name "format_list_bulleted"}
            :heading-one {:body (element "h1")
                          :icon-name "looks_one"}
            :heading-two {:body (element "h2")
                          :icon-name "looks_two"}
            :block-quote {:body (element "blockquote")
                          :icon-name "format_quote"}
-           :bulleted-list {:body (element "ul")
-                           :icon-name "format_list_bulleted"}}
+           :table {:body (element "tbody")
+                   :icon-name "view_module"}
+           :table-row {:body (element "tr")}
+           :table-cell {:body (element "td")}}
    :marks {:bold {:fontWeight "bold"
                   :icon-name "format_bold"}
            :italic {:fontStyle "italic"

@@ -11,42 +11,222 @@
       \"nodes\": [
         {
           \"kind\": \"text\",
-          \"ranges\": [
+          \"text\": \"Since the editor is based on a recursive tree model, similar to an HTML document, you can create complex nested structures, like tables:\"
+        }
+      ]
+    },
+    {
+      \"kind\": \"block\",
+      \"type\": \"table\",
+      \"nodes\": [
+        {
+          \"kind\": \"block\",
+          \"type\": \"table-row\",
+          \"nodes\": [
             {
-              \"text\": \"This is editable \"
-            },
-            {
-              \"text\": \"rich\",
-              \"marks\": [
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
                 {
-                  \"type\": \"bold\"
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"\"
+                    }
+                  ]
                 }
               ]
             },
             {
-              \"text\": \" text, \"
-            },
-            {
-              \"text\": \"much\",
-              \"marks\": [
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
                 {
-                  \"type\": \"italic\"
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"Human\",
+                      \"marks\": [
+                        {
+                          \"type\": \"bold\"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
             {
-              \"text\": \" better than a \"
-            },
-            {
-              \"text\": \"<textarea>\",
-              \"marks\": [
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
                 {
-                  \"type\": \"code\"
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"Dog\",
+                      \"marks\": [
+                        {
+                          \"type\": \"bold\"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
             {
-              \"text\": \"!\"
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"Cat\",
+                      \"marks\": [
+                        {
+                          \"type\": \"bold\"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          \"kind\": \"block\",
+          \"type\": \"table-row\",
+          \"nodes\": [
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"# of Feet\",
+                      \"marks\": [
+                        {
+                          \"type\": \"bold\"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"1\"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"4\"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"4\"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          \"kind\": \"block\",
+          \"type\": \"table-row\",
+          \"nodes\": [
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"# of Lives\",
+                      \"marks\": [
+                        {
+                          \"type\": \"bold\"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"1\"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"1\"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              \"kind\": \"block\",
+              \"type\": \"table-cell\",
+              \"nodes\": [
+                {
+                  \"kind\": \"text\",
+                  \"ranges\": [
+                    {
+                      \"text\": \"9\"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -58,43 +238,10 @@
       \"nodes\": [
         {
           \"kind\": \"text\",
-          \"ranges\": [
-            {
-              \"text\": \"Since it's rich text, you can do things like turn a selection of text \"
-            },
-            {
-              \"text\": \"bold\",
-              \"marks\": [
-                {
-                  \"type\": \"bold\"
-                }
-              ]
-            },{
-              \"text\": \", or add a semantically rendered block quote in the middle of the page, like this:\"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      \"kind\": \"block\",
-      \"type\": \"block-quote\",
-      \"nodes\": [
-        {
-          \"kind\": \"text\",
-          \"text\": \"A wise quote.\"
-        }
-      ]
-    },
-    {
-      \"kind\": \"block\",
-      \"type\": \"paragraph\",
-      \"nodes\": [
-        {
-          \"kind\": \"text\",
-          \"text\": \"Try it out for yourself!\"
+          \"text\": \"This table is just a basic example of renderzzzing a table, and it doest have fancy functionality. But you could augment it to add support for navigating with arrow keys, displaying table headers, adding column and rows, or even formulas if you wanted to get really crazy\"
         }
       ]
     }
   ]
-}"))
+}"
+))

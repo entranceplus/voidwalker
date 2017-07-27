@@ -54,9 +54,6 @@
    (fn [transform type]
      (.wrapBlock transform type)) transform block-types))
 
-(comment
-  (.apply (wrap-block (.transform @state) "numbered-list")))
-
 (defn unwrap-list-blocks [transform]
   (unwrap-block transform "bulleted-list" "numbered-list"))
 
