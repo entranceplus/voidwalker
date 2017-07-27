@@ -15,7 +15,12 @@
                            :icon-name "format_list_numbered"}
            :heading-one {:body (element "h1")
                          :icon-name "looks_one"}
-           }
+           :heading-two {:body (element "h2")
+                         :icon-name "looks_two"}
+           :block-quote {:body (element "blockquote")
+                         :icon-name "format_quote"}
+           :bulleted-list {:body (element "ul")
+                           :icon-name "format_list_bulleted"}}
    :marks {:bold {:fontWeight "bold"
                   :icon-name "format_bold"}
            :italic {:fontStyle "italic"
