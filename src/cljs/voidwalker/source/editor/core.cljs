@@ -7,6 +7,8 @@
 
 (def slate (.. js/window -deps -slate))
 
+(def edit-table-plugin  (.. js/window -deps -edittable))
+
 (def state (r/atom (.deserialize (.-Raw slate)
                                     (state/initial)
                                     #js {:terse true})))
@@ -123,32 +125,48 @@
 ;; toolbar ;;
 ;;;;;;;;;;;;;
 
+(defn toolbar-render [{:keys [btn-list-md
+                              on-mouse-down
+                              active?]}]
+  [:div (doall (for [btn-md btn-list-md]
+                  (let [type (name (key btn-md))
+                        icon (:icon-name (val btn-md))]
+                    [:span.some-padding
+                     {:key type}
+                     [:a.bottom
+                      {:on-click (fn [e]
+                                   (on-mouse-down e type))
+                       :data-active (active? type)
+                       :data-placement "bottom"
+                       :data-toggle "tooltip"
+                       :data-original-title type}
+                      [:span.material-icons icon]]])))])
+
 (defn toolbar-buttons [{:keys [btn-list-md on-mouse-down active?]}]
-  (doall (for [btn-md btn-list-md]
-           (let [type (name (key btn-md))
-                 icon (:icon-name (val btn-md))]
-             [:span.button
-              {:on-click (fn [e]
-                                (on-mouse-down e type))
-               :data-active (active? type)
-               :key type}
-              [:span.material-icons icon]]))))
+  (r/create-class {:component-did-mount
+                   #(.tooltip ((.-$ js/window) "a"))
+
+                   :display-name "Toolbar-Buttons"
+
+                   :reagent-render toolbar-render}))
+
+;; (println "Does this even work")
 
 (defn toolbar []
   (let [{:keys [marks nodes]}  (schema/app)]
     [:div.menu.toolbar-menu
 
      ;; mark-toggling toolbar buttons
-     (toolbar-buttons
+     [toolbar-buttons
       {:btn-list-md marks
        :on-mouse-down (partial on-click-mark state)
-       :active? (partial has-mark? state)})
+       :active? (partial has-mark? state)}]
 
      ;; block-toggling toolbar buttons
-     (toolbar-buttons
+     [toolbar-buttons
       {:btn-list-md nodes
        :on-mouse-down (partial on-click-block state)
-       :active? (partial has-block? state)})
+       :active? (partial has-block? state)}]
      ]))
 
 ;;;;;;;;;;;;
@@ -161,12 +179,14 @@
                   (clj->js attrs)
                   children))
 
+
 (defn slate-editor []
   (jsx "div"
        {:className "editor"}
        (jsx (.-Editor slate)
             {:state @state
              :schema (schema/slate)
+             :plugins [ (edit-table-plugin) ]
              :placeholder "Compose an epic"
              :onChange #(reset! state %)})))
 

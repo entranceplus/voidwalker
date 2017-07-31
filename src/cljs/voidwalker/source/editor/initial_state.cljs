@@ -4,244 +4,158 @@
   (.parse
    js/JSON
    "{
-  \"nodes\": [
-    {
-      \"kind\": \"block\",
-      \"type\": \"paragraph\",
-      \"nodes\": [
+    \"nodes\": [
         {
-          \"kind\": \"text\",
-          \"text\": \"Since the editor is based on a recursive tree model, similar to an HTML document, you can create complex nested structures, like tables:\"
-        }
-      ]
-    },
-    {
-      \"kind\": \"block\",
-      \"type\": \"table\",
-      \"nodes\": [
-        {
-          \"kind\": \"block\",
-          \"type\": \"table-row\",
-          \"nodes\": [
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
+            \"kind\": \"block\",
+            \"type\": \"heading\",
+            \"nodes\": [
                 {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"\"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"Human\",
-                      \"marks\": [
+                    \"kind\": \"text\",
+                    \"ranges\": [
                         {
-                          \"type\": \"bold\"
+                            \"text\": \"Slate + Table Edition\"
                         }
-                      ]
-                    }
-                  ]
+                    ]
                 }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"Dog\",
-                      \"marks\": [
-                        {
-                          \"type\": \"bold\"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"Cat\",
-                      \"marks\": [
-                        {
-                          \"type\": \"bold\"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+            ]
         },
         {
-          \"kind\": \"block\",
-          \"type\": \"table-row\",
-          \"nodes\": [
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
+            \"kind\": \"block\",
+            \"type\": \"paragraph\",
+            \"nodes\": [
                 {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"# of Feet\",
-                      \"marks\": [
+                    \"kind\": \"text\",
+                    \"ranges\": [
                         {
-                          \"type\": \"bold\"
+                            \"text\": \"This page is a basic example of Slate + slate-edit-table plugin.\"
                         }
-                      ]
-                    }
-                  ]
+                    ]
                 }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"1\"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"4\"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"4\"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+            ]
         },
         {
-          \"kind\": \"block\",
-          \"type\": \"table-row\",
-          \"nodes\": [
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
+            \"kind\": \"block\",
+            \"type\": \"table\",
+            \"nodes\": [
                 {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"# of Lives\",
-                      \"marks\": [
+                    \"kind\": \"block\",
+                    \"type\": \"table_row\",
+                    \"nodes\": [
                         {
-                          \"type\": \"bold\"
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Col 1\"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Col 2\"
+                                        }
+                                    ]
+                                }
+                            ]
                         }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
+                    ]
+                },
                 {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"1\"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
+                    \"kind\": \"block\",
+                    \"type\": \"table_row\",
+                    \"nodes\": [
+                        {
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Cell 1,1\"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Cell 1,2\"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
                 {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"1\"
-                    }
-                  ]
+                    \"kind\": \"block\",
+                    \"type\": \"table_row\",
+                    \"nodes\": [
+                        {
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Cell 2,1\"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            \"kind\": \"block\",
+                            \"type\": \"table_cell\",
+                            \"nodes\": [
+                                {
+                                    \"kind\": \"text\",
+                                    \"ranges\": [
+                                        {
+                                            \"text\": \"Cell 2,2\"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
                 }
-              ]
-            },
-            {
-              \"kind\": \"block\",
-              \"type\": \"table-cell\",
-              \"nodes\": [
-                {
-                  \"kind\": \"text\",
-                  \"ranges\": [
-                    {
-                      \"text\": \"9\"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      \"kind\": \"block\",
-      \"type\": \"paragraph\",
-      \"nodes\": [
+            ]
+        },
         {
-          \"kind\": \"text\",
-          \"text\": \"This table is just a basic example of renderzzzing a table, and it doest have fancy functionality. But you could augment it to add support for navigating with arrow keys, displaying table headers, adding column and rows, or even formulas if you wanted to get really crazy\"
+            \"kind\": \"block\",
+            \"type\": \"paragraph\",
+            \"nodes\": [
+                {
+                    \"kind\": \"text\",
+                    \"ranges\": [
+                        {
+                            \"text\": \"Use Tab and Shift+Tab to move from cell to cells. Press Enter to go to next row. Press Up/Down to navigate the rows.\"
+                        }
+                    ]
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }"
-))
+   )
+  )

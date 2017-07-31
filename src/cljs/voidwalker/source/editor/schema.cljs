@@ -21,8 +21,8 @@
                          :icon-name "format_quote"}
            :table {:body (element "tbody")
                    :icon-name "view_module"}
-           :table-row {:body (element "tr")}
-           :table-cell {:body (element "td")}}
+           :table_row {:body (element "tr")}
+           :table_cell {:body (element "td")}}
    :marks {:bold {:fontWeight "bold"
                   :icon-name "format_bold"}
            :italic {:fontStyle "italic"

@@ -189,3 +189,7 @@ html,body{
 .input-area {
     margin: 30px;
 }
+
+.some-padding {
+    padding: 20px;
+}

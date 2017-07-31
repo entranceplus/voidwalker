@@ -1,7 +1,8 @@
 window.deps = {
     'react' : require('react'),
     'react-dom' : require('react-dom'),
-    'slate' : require('slate')
+    'slate' : require('slate'),
+    'edittable': require('slate-edit-table')
 };
 
 console.log("slate", require('slate'));

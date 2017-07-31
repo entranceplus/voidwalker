@@ -23,6 +23,7 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "slate": "^0.21.0",
+    "slate-edit-table": "^0.10.1",
     "webpack": "^3.3.0"
   }
 }
