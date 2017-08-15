@@ -38,7 +38,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn insert-table [transform]
-  (println "trying to insert table")
   (.insertTable (.-transforms edit-table-plugin)
                 transform))
 
@@ -237,7 +236,9 @@
 ;; (println "Does this even work")
 
 (defn toolbar []
-  (let [{:keys [marks nodes context-transforms]}  (schema/app)]
+  (let [{:keys [marks nodes context-transforms]}  (schema/app)
+        table? (.isSelectionInTable (.-utils edit-table-plugin)
+                                    @state)]
     [:div.menu.toolbar-menu
 
      ;; mark-toggling toolbar buttons
@@ -252,11 +253,14 @@
                  :on-mouse-down (partial on-click-block state)
                  :active? (partial has-block? state)}]]
 
-     [:div.row.some-padding [toolbar-buttons
-                {:btn-list-md context-transforms
-                 :on-mouse-down (partial on-click-context state)
-                 :active? false}]]]
-     ))
+     ;; context buttons
+     [:div.row.some-padding
+      {:class (when-not table? "hidden")}
+      [toolbar-buttons
+       {:btn-list-md context-transforms
+        :on-mouse-down (partial on-click-context state)
+        :active? false}]]]
+    ))
 
 ;;;;;;;;;;;;
 ;; editor ;;
