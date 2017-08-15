@@ -7,6 +7,10 @@
                     (.-attributes props)
                     (.-children props))))
 
+;; note :body is only being used in function transform-node
+;; which is being used once to serialize state from json
+;; just there ??? why is it so abstracted then ..
+;; clean it..!!
 (defn app []
   {:nodes {:list-item {:body (element "li")}
            :numbered-list {:body (element "ol")
@@ -28,13 +32,20 @@
            :italic {:fontStyle "italic"
                     :icon-name "format_italic"}
            :underlined {:textDecoration "underline"
-                        :icon-name "format_underlined"}}})
+                        :icon-name "format_underlined"}}
+   :context-transforms {:remove-table {:button? true}
+                        :remove-row {:button? true}
+                        :remove-column {:button? true}
+                        :add-column {:button? true}
+                        :add-row {:button? true}}})
 
 (defn- transform-node [app-nodes]
   (reduce (fn [agg node]
             (conj agg {(key node) (:body (val node))}))
           {}
           app-nodes))
+
+;; (filter #() ())
 
 (defn app->slate [{:keys [nodes] :as schema}]
   (assoc schema :nodes (transform-node nodes)))

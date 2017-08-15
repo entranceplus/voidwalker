@@ -155,13 +155,6 @@ input:focus {
   margin-top: 1em;
 }
 
-.menu > * {
-  display: inline-block;
-}
-
-.menu > * + * {
-  margin-left: 15px;
-}
 
 .button {
   color: #ccc;
@@ -231,4 +224,8 @@ input:focus {
   padding: 12px;
   background-color: #EBEBEB;
   display: inline-block;
+}
+
+.space {
+    margin: -10px 12px 20px 12px;
 }
