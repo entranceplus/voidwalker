@@ -62,6 +62,7 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
+
 (defn add-post-form [& {{:keys [url tags content title id]} :data}]
   (let [url (r/atom url)
         tags (r/atom tags)
@@ -88,13 +89,7 @@
                 :state title}]
         [:div.form-group [e/editor
                           {:id "my-quill-editor-component-id"
-                           :content content
-                           ;; :selection nil
-                           ;; :on-change-fn (fn [source data]
-                           ;;                 (when (= source "user")
-                           ;;                   (reset! content data)))
-                           }
-                          ]]
+                           :content content}]]
         [:div.form-group>button.btn.btn-primary
          {:on-click (fn [e]
                       (.preventDefault e)
@@ -110,7 +105,10 @@
 
 (defn add-post
   ([] (add-post-form))
-  ([id] (add-post-form :data @(rf/subscribe [:article id]))))
+  ([id] (let [article-data @(rf/subscribe [:article id])]
+          (if (e/json? (:content article-data))
+            (add-post-form :data article-data)
+            [:h1 "This article is not supported by this editor."]))))
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;

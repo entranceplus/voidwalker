@@ -36,6 +36,11 @@
 ;; serialization ;;
 ;;;;;;;;;;;;;;;;;;;
 
+(defn json? [string]
+  (try (do  (.parse js/JSON string)
+            true)
+       (catch js/Error e false)))
+
 (defn get-serialized-state [state]
   (.stringify js/JSON (.serialize (.-Raw slate)
                                   state)))
