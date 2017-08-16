@@ -5,8 +5,7 @@
 
 (defn editor [{:keys [id content selection on-change-fn]}]
   [e/editor])
-
-  
+ 
 (defn display-area [{:keys [id content]}]
   (let [this (r/atom nil)]
     (r/create-class

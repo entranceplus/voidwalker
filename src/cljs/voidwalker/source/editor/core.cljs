@@ -1,7 +1,7 @@
 (ns voidwalker.source.editor.core
   (:require [webpack.bundle]
             [reagent.core :as r]
-            [voidwalker.source.editor.initial-state :as state]
+            [voidwalker.source.editor.initial-state :as st]
             [voidwalker.source.editor.schema :as schema]))
 
 ;; ;;;;;;;;;;;;;;;;;;;
@@ -26,12 +26,35 @@
 
 (def edit-table-plugin  ((.. js/window -deps -edittable)))
 
-(def state (r/atom (.deserialize (.-Raw slate)
-                                    (state/initial)
-                                    #js {:terse true})))
+;; (def state (r/atom (.deserialize (.-Raw slate)
+;;                                     (st/initial)
+;;                                     #js {:terse true})))
 
 (def default-node "paragraph")
 
+;;;;;;;;;;;;;;;;;;;
+;; serialization ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defn get-serialized-state [state]
+  (.stringify js/JSON (.serialize (.-Raw slate)
+                                  state)))
+
+(defn empty-state []
+  (.deserialize (.-Raw slate)
+                (st/initial)
+                #js {:terse true}))
+
+(defn deserialize-state [raw-state]
+  (println "deserializing " raw-state)
+  (.deserialize (.-Raw slate)
+                (.parse js/JSON raw-state)
+                #js {:terse true}))
+
+;; quick and dirty fix for initialization of state,
+;; state cab be obtained from a reframe subscription ?
+(defn set-state! [raw-state]
+  (deserialize-state raw-state))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; edit table helpers ;;
@@ -179,8 +202,6 @@
 (defn prompt! [message]
   (.prompt js/window message))
 
-(.-isExpanded@state)
-
 ;;; this function is supposed to be used after partial application
 ;;; see if this can be replaced by a macro. I feel most of the 
 ;;; glue code can be
@@ -275,10 +296,11 @@
 
 ;; (println "Does this even work")
 
-(defn toolbar []
+(defn toolbar [state]
   (let [{:keys [marks nodes context-transforms]}  (schema/app)
-        table? (.isSelectionInTable (.-utils edit-table-plugin)
-                                    @state)]
+        table? (fn [state]
+                 (.isSelectionInTable (.-utils edit-table-plugin)
+                                      @state))]
     [:div.menu.toolbar-menu
 
      ;; mark-toggling toolbar buttons
@@ -295,7 +317,7 @@
 
      ;; context buttons
      [:div.row.some-padding
-      {:class (when-not table? "hidden")}
+      {:class (when-not (table? state) "hidden")}
       [toolbar-buttons
        {:btn-list-md context-transforms
         :on-mouse-down (partial on-click-context state)
@@ -313,7 +335,7 @@
                   children))
 
 
-(defn slate-editor []
+(defn slate-editor [state]
   (jsx "div"
        {:className "editor"}
        (jsx (.-Editor slate)
@@ -326,7 +348,11 @@
 (defn sp-button [text]
   [:button.space.btn.btn-default "Remove table"])
 
-(defn editor []
+;;;;;;;;;;;;;;;;;;;;;;
+;; public component ;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+(defn editor [{:keys [content]}]
   [:div
-   [toolbar]
-   [slate-editor]])
+   [toolbar content]
+   [slate-editor content]])

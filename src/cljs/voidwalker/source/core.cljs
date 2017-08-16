@@ -11,6 +11,7 @@
             [accountant.core :as accountant]
             [cljsjs.quill]
             [voidwalker.source.quill :as q]
+            [voidwalker.source.editor.core :as e]
             [clojure.core.async :as async]
             [voidwalker.source.subscriptions]
             ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
@@ -64,16 +65,18 @@
 (defn add-post-form [& {{:keys [url tags content title id]} :data}]
   (let [url (r/atom url)
         tags (r/atom tags)
-        content (r/atom content)
         title (r/atom title)
+        content (r/atom (if content
+                          (e/deserialize-state content)
+                          (e/empty-state)))
         post-status (rf/subscribe [:new/post-status])]
     (fn []
       ;;todo clean this up
       (when (= @post-status :success)
         (do (reset! url "")
             (reset! tags "")
-            (reset! content "")
-            (reset! title "")))
+            (reset! title "")
+            (reset! content (e/empty-state))))
       [:div.container
        [:h1 "New Article"]
        [:form
@@ -83,21 +86,24 @@
                 :state tags}]
         [input {:placeholder "Enter title"
                 :state title}]
-        [:div.form-group [q/editor
+        [:div.form-group [e/editor
                           {:id "my-quill-editor-component-id"
-                           :content @content
-                           :selection nil
-                           :on-change-fn (fn [source data]
-                                           (when (= source "user")
-                                             (reset! content data)))}]]
+                           :content content
+                           ;; :selection nil
+                           ;; :on-change-fn (fn [source data]
+                           ;;                 (when (= source "user")
+                           ;;                   (reset! content data)))
+                           }
+                          ]]
         [:div.form-group>button.btn.btn-primary
          {:on-click (fn [e]
                       (.preventDefault e)
-                      (rf/dispatch [:save-article {:url @url
-                                                   :id id
-                                                   :tags @tags
-                                                   :content @content
-                                                   :title @title}]))}
+                      (rf/dispatch [:save-article
+                                    {:url @url
+                                     :id id
+                                     :tags @tags
+                                     :content (e/get-serialized-state @content)
+                                     :title @title}]))}
          "Save article"]
         [progress-info @post-status]]])))
 
