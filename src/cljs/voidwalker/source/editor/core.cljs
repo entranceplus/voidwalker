@@ -135,6 +135,14 @@
 (defn has-mark? [state type]
   (check-type (.-marks @state) type))
 
+;;;;;;;;;;;;;;;;;
+;; for inlines ;;
+;;;;;;;;;;;;;;;;;
+
+(defn has-inline? [state type]
+  (check-type (.-inlines @state) type))
+
+
 ;;;;;;;;;;;;;;;;
 ;; for blocks ;;
 ;;;;;;;;;;;;;;;;
@@ -143,7 +151,7 @@
   (transform-state state
                    (fn [transform]
                      (let [tf (set-block transform
-                                         (if (has-block? state type)
+                                         (if  (has-block? state type)
                                            default-node
                                            type))]
                        (if list? (unwrap-list-blocks tf) tf)))))
@@ -168,6 +176,36 @@
                                (set-block "list-item")
                                (wrap-block type))))))
 
+(defn prompt! [message]
+  (.prompt js/window message))
+
+(.-isExpanded@state)
+
+;;; this function is supposed to be used after partial application
+;;; see if this can be replaced by a macro. I feel most of the 
+;;; glue code can be
+(defn transform-inline [state type transform]
+  (cond
+    (has-inline? state type) (do (println "Is inline")
+                                 (.unwrapInline transform type))
+    (.-isExpanded @state) (do (println "It is expanded")
+                             (-> transform
+                                 (.wrapInline (clj->js {:type type
+                                                        :data (when (= type "link")
+                                                                {:href (prompt! "Enter the url of the link")})}))
+                                 .collapseToEnd)) 
+    :else (let [text (prompt! "Enter text for link")
+                href (prompt! "Enter url for the link")]
+            (println "href is " href)
+            (-> transform
+                (.insertText text)
+                (.extend (- 0 (count text)))
+                (.wrapInline (clj->js 
+                              {:type type
+                               :data {:href href}}))
+                .collapseToEnd))))
+
+
 (defn on-click-block [state e type]
   (println "block clicked " type)
   (let [list? (has-block? state "list-item")]
@@ -175,7 +213,9 @@
       (or (= type "bulleted-list")
            (= type "numbered-list")) (transform-lists state type list?)
       (= type "table") (transform-state state insert-table)
+      (= type "link") (transform-state state (partial transform-inline state type))
       :else (transform-block-elements state type list?))))
+
 
 
 (defn on-click-context [state e type]
@@ -208,22 +248,22 @@
 (defn context-buttons [{:keys [on-click active? type icon]}]
   [:span.col-md-2
    {:key type} [:button.btn.btn-info {:on-click (fn [e]
-                                     (.preventDefault e)
-                                     (on-click e type))} type]])
+                                                  (.preventDefault e)
+                                                  (on-click e type))} type]])
 
 
 (defn toolbar-render [{:keys [btn-list-md
                               on-mouse-down
                               active?]}]
   [:div (doall (for [btn-md btn-list-md]
-                  (let [attrs {:on-click on-mouse-down
-                                   :active? active?
-                                   :type (name (key btn-md))
-                                   :icon (:icon-name (val btn-md))}
-                           button? (:button? (val btn-md))]
-                    (if button?
-                      (context-buttons  attrs)
-                      (icon-buttons attrs)))))])
+                 (let [attrs {:on-click on-mouse-down
+                              :active? active?
+                              :type (name (key btn-md))
+                              :icon (:icon-name (val btn-md))}
+                       button? (:button? (val btn-md))]
+                   (if button?
+                     (context-buttons  attrs)
+                     (icon-buttons attrs)))))])
 
 (defn toolbar-buttons [{:keys [btn-list-md on-mouse-down active?]}]
   (r/create-class {:component-did-mount
@@ -243,15 +283,15 @@
 
      ;; mark-toggling toolbar buttons
      [:div.row.some-padding [toolbar-buttons
-                {:btn-list-md marks
-                 :on-mouse-down (partial on-click-mark state)
-                 :active? (partial has-mark? state)}]]
+                             {:btn-list-md marks
+                              :on-mouse-down (partial on-click-mark state)
+                              :active? (partial has-mark? state)}]]
 
      ;; block-toggling toolbar buttons
      [:div.row.some-padding [toolbar-buttons
-                {:btn-list-md nodes
-                 :on-mouse-down (partial on-click-block state)
-                 :active? (partial has-block? state)}]]
+                             {:btn-list-md nodes
+                              :on-mouse-down (partial on-click-block state)
+                              :active? (partial has-block? state)}]]
 
      ;; context buttons
      [:div.row.some-padding

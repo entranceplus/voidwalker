@@ -1,11 +1,29 @@
-(ns voidwalker.source.editor.schema)
+(ns voidwalker.source.editor.schema
+  (:require [reagent.core :as r]))
 
-(defn element [e]
+(defn *p* [whatever]
+  (println whatever)
+  whatever)
+
+;; (def merge-js [& rest]
+;;   (.assign js/Object))
+
+;; (.assign js/Object
+;;          #js {}
+;;          (.-attributes props)
+;;          #js {:href (.get (.. props -node -data) "href")})
+
+(defn element [e & inline?]
   (fn [props]
-    (.createElement js/React
-                    e
-                    (.-attributes props)
-                    (.-children props))))
+    (let [element-props (if inline?
+                          (clj->js (merge (js->clj (.-attributes props))
+                                          {:href (.get (.. props -node -data)
+                                                       "href")}))
+                          (.-attributes props))]
+      (.createElement js/React
+                      e
+                      element-props
+                      (.-children props)))))
 
 ;; note :body is only being used in function transform-node
 ;; which is being used once to serialize state from json
@@ -23,6 +41,8 @@
                          :icon-name "looks_two"}
            :block-quote {:body (element "blockquote")
                          :icon-name "format_quote"}
+           :link {:body (element "a" true)
+                  :icon-name "http"}
            :table {:body (element "tbody")
                    :icon-name "view_module"}
            :table_row {:body (element "tr")}
