@@ -14,6 +14,7 @@
             [voidwalker.source.editor.core :as e]
             [clojure.core.async :as async]
             [voidwalker.source.subscriptions]
+            [voidwalker.source.util :refer [get-value]]
             ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
             )
   (:import goog.History))
@@ -23,11 +24,6 @@
    [:div.row
     [:div.col-md-12
      [:img {:src (str js/context "/img/warning_clojure.png")}]]]])
-
-
-(defn get-value [e]
-  (-> e .-target .-value))
-
 
 (defn navbar []
   [:nav.navbar.navbar-default>div.container-fluid

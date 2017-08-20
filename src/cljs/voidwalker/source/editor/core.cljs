@@ -1,6 +1,7 @@
 (ns voidwalker.source.editor.core
   (:require [webpack.bundle]
             [reagent.core :as r]
+            [voidwalker.source.util :as u]
             [voidwalker.source.editor.initial-state :as st]
             [voidwalker.source.editor.schema :as schema]))
 
@@ -144,20 +145,111 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn transform-state [state transform-fn]
-  (swap! state (fn [cur-state]
-                 (clj->js (-> cur-state
-                              .transform
-                              transform-fn
-                              .apply)))))
+  "Transforms a js Slate object and returns the state after application"
+  (clj->js (-> state
+               .transform
+               transform-fn
+               .apply)))
+
+(defn transform-state-atom [state transform-fn]
+  "transform-state wrapped in an atom"
+  (swap! state #(transform-state % transform-fn)))
 
 
 ;;;;;;;;;;;;;;;
 ;; for marks ;;
 ;;;;;;;;;;;;;;;
 
-(defn on-click-mark [state e mark-type]
+(defn get-mark [state mark-type]
+  "get the first mark of type mark-type in slate"
+  (first (filter (fn [mark]
+                   (=  (:type mark) mark-type)) (slate->clj (.-marks state)))))
+
+(defn transform-element [state type transform attrs]
+  (cond
+    (check-type (condp = (:transform-type attrs)
+                  :inline (.-inlines @state)
+                  :mark (.-marks @state)) type) ((:has-element? attrs))
+    (.-isExpanded @state) (do (println "is epp " (:expanded attrs))
+                              ((:expanded attrs)))
+    :else (do (println "asd")
+              ((:otherwise attrs)))))
+
+;; all this seems like a trick to solve eager evaluation,, maybe consider a
+;; macro .. the thing I still don't have a good idea of how the final model
+;; should be.. it could be sth liek a dsl for writing marks and nodes
+;; i think i cam reinventing the pugin maybe??? TODO check
+(defn transform-inline [state type transform]
+  "transform an inline element like an href"
+  (transform-element state type transform
+                     {:transform-type :inline
+                      :has-element? (fn []
+                              
+                                      (.unwrapInline transform type))
+                      :expanded (fn []
+                                  (println "expanded")
+                                  (-> transform
+                                      (.wrapInline (clj->js {:type type
+                                                             :data (when (= type "link")
+                                                                     {:href (u/prompt! "Enter the url of the link")})}))
+                                      .collapseToEnd))
+                      :otherwise (fn []
+
+                                   (let [text (u/prompt! "Enter text for link")
+                                         href (u/prompt! "Enter url for the link")]
+                                     (println "href is " href)
+                                     (-> transform
+                                         (.insertText text)
+                                         (.extend (- 0 (count text)))
+                                         (.wrapInline (clj->js
+                                                       {:type type
+                                                        :data {:href href}}))
+                                         .collapseToEnd)))}))
+
+
+;; transforms could be described as [transform :removeMark :addMark] etc
+;; we'll see
+
+
+(defn remove-mark [transform mark]
+  (println "remove amrks adapter")
+  (if (not= nil mark)
+    (.removeMark transform (clj->js mark))
+    transform))
+
+(defn transform-mark [state mark-props transform]
+  "transform a mark element"
+  (println "OOH here itseled " mark-props)
+  (transform-element state (:type mark-props) transform
+                     {:transform-type :mark
+                      :has-element? (fn []
+                                      (println "has stuff")
+                                      (if (.-isExpanded @state)
+                                        (-> transform
+                                            (remove-mark (get-mark @state
+                                                                   (:type mark-props)))
+                                            (.addMark (clj->js mark-props)))
+                                        (println "[SlateJS][FontSizePlugin] selection collapsed, w/ inline.")))
+                      :expanded (fn []
+                                  (println "expanded")
+                                  (-> transform
+                                      (.addMark (clj->js mark-props))))
+                      :otherwise (fn []
+                                   (println "otherwise")
+                                   (println "[SlateJS][FontSizePlugin] selection collapsed, w/o inline."))})
+  transform)
+
+
+(defn on-click-mark [state e mark-props]
   (.preventDefault e)
-  (transform-state state #(.toggleMark %  mark-type)))
+  (println "processing mark " mark-props)
+  (let [js-mark-type (clj->js mark-props)
+        type (:type mark-props)
+        transform-fn (if (= type "font-size")
+                       #(transform-mark state mark-props %)
+                       #(.toggleMark %  js-mark-type))]
+    (transform-state-atom state transform-fn)))
+
 
 
 (defn has-mark? [state type]
@@ -167,26 +259,23 @@
 ;; for inlines ;;
 ;;;;;;;;;;;;;;;;;
 
-(defn has-inline? [state type]
-  (check-type (.-inlines @state) type))
-
 
 ;;;;;;;;;;;;;;;;
 ;; for blocks ;;
 ;;;;;;;;;;;;;;;;
 
 (defn transform-block-elements [state type list?]
-  (transform-state state
+  (transform-state-atom state
                    (fn [transform]
                      (let [tf (set-block transform
-                                         (if  (has-block? state type)
+                                         (if (has-block? state type)
                                            default-node
                                            type))]
                        (if list? (unwrap-list-blocks tf) tf)))))
 
 
 (defn transform-lists [state type list?]
-  (transform-state state
+  (transform-state-atom state
                        (fn [transform]
                          (cond
                            (and list? (type? @state type))
@@ -204,32 +293,10 @@
                                (set-block "list-item")
                                (wrap-block type))))))
 
-(defn prompt! [message]
-  (.prompt js/window message))
-
 ;;; this function is supposed to be used after partial application
-;;; see if this can be replaced by a macro. I feel most of the 
-;;; glue code can be
-(defn transform-inline [state type transform]
-  (cond
-    (has-inline? state type) (do (println "Is inline")
-                                 (.unwrapInline transform type))
-    (.-isExpanded @state) (do (println "It is expanded")
-                             (-> transform
-                                 (.wrapInline (clj->js {:type type
-                                                        :data (when (= type "link")
-                                                                {:href (prompt! "Enter the url of the link")})}))
-                                 .collapseToEnd)) 
-    :else (let [text (prompt! "Enter text for link")
-                href (prompt! "Enter url for the link")]
-            (println "href is " href)
-            (-> transform
-                (.insertText text)
-                (.extend (- 0 (count text)))
-                (.wrapInline (clj->js 
-                              {:type type
-                               :data {:href href}}))
-                .collapseToEnd))))
+;;; see if this can be replaced by a macro. I feel most of the
+;;; glue code can be..... but should we? I still don't think so
+;;; HOF are working but things are getting complicated
 
 
 (defn on-click-block [state e type]
@@ -238,20 +305,18 @@
     (cond
       (or (= type "bulleted-list")
            (= type "numbered-list")) (transform-lists state type list?)
-      (= type "table") (transform-state state insert-table)
-      (= type "link") (transform-state state (partial transform-inline state type))
+      (= type "table") (transform-state-atom state insert-table)
+      (= type "link") (transform-state-atom state (partial transform-inline state type))
       :else (transform-block-elements state type list?))))
-
-
 
 (defn on-click-context [state e type]
   (println "handling click of type " type)
   (cond
-    (= type "remove-table") (transform-state state remove-table)
-    (= type "remove-row") (transform-state state remove-row)
-    (= type "remove-column") (transform-state state remove-column)
-    (= type "add-column") (transform-state state add-column)
-    (= type "add-row") (transform-state state add-row)))
+    (= type "remove-table") (transform-state-atom state remove-table)
+    (= type "remove-row") (transform-state-atom state remove-row)
+    (= type "remove-column") (transform-state-atom state remove-column)
+    (= type "add-column") (transform-state-atom state add-column)
+    (= type "add-row") (transform-state-atom state add-row)))
 
 
 ;;;;;;;;;;;;;
@@ -269,35 +334,55 @@
                   :data-original-title type}
                  [:span.material-icons icon]]])
 
-;; TODO hide in context menu when not needed
 
-(defn context-buttons [{:keys [on-click active? type icon]}]
-  [:span.col-md-2
-   {:key type} [:button.btn.btn-info {:on-click (fn [e]
-                                                  (.preventDefault e)
-                                                  (on-click e type))} type]])
+(defn custom-buttons [{:keys [on-click active? type icon element state]}]
+  (fn []
+    [:span.col-md-2
+     (condp = element
+       :button [:button.btn.btn-info
+                {:on-click (fn [e]
+                             (.preventDefault e)
+                             (on-click e type))
+                 :key type} type]
+       :number-input [:input
+                      {:type "number"
+                       :key type
+                       :placeholder (str "Enter value for " type)
+                       :value (u/num (get-in (get-mark @state type)
+                                             [:data :font-size]))
+                       :on-key-down (fn [e]
+                                      (when (= 13 (u/keycode e))
+                                        (on-click e
+                                                  {:data {:font-size (str  (u/get-value e) "px")}
+                                                   :type type})))}])]))
 
 
 (defn toolbar-render [{:keys [btn-list-md
                               on-mouse-down
-                              active?]}]
+                              active?
+                              state]}]
   [:div (doall (for [btn-md btn-list-md]
                  (let [attrs {:on-click on-mouse-down
                               :active? active?
                               :type (name (key btn-md))
-                              :icon (:icon-name (val btn-md))}
+                              :icon (:icon-name (val btn-md))
+                              :element (:element (val btn-md))
+                              :key (name (key btn-md))
+                              :state state}
                        button? (:button? (val btn-md))]
-                   (if button?
-                     (context-buttons  attrs)
-                     (icon-buttons attrs)))))])
+                   (println "as " (:element attrs))
+                   (if (= nil (:element attrs))
+                     (icon-buttons attrs)
+                     [custom-buttons attrs]))))])
 
-(defn toolbar-buttons [{:keys [btn-list-md on-mouse-down active?]}]
+
+(defn toolbar-buttons [{:keys [btn-list-md on-mouse-down active? state] :as props}]
   (r/create-class {:component-did-mount
                    #(.tooltip ((.-$ js/window) "a"))
 
                    :display-name "Toolbar-Buttons"
 
-                   :reagent-render toolbar-render}))
+                   :reagent-render #(toolbar-render props)}))
 
 ;; (println "Does this even work")
 
@@ -311,23 +396,27 @@
      ;; mark-toggling toolbar buttons
      [:div.row.some-padding [toolbar-buttons
                              {:btn-list-md marks
+                              :state state
                               :on-mouse-down (partial on-click-mark state)
                               :active? (partial has-mark? state)}]]
 
      ;; block-toggling toolbar buttons
      [:div.row.some-padding [toolbar-buttons
                              {:btn-list-md nodes
+                              :state state
                               :on-mouse-down (partial on-click-block state)
                               :active? (partial has-block? state)}]]
 
      ;; context buttons
      [:div.row.some-padding
-      {:class (when-not (table? state) "hidden")}
+      {:class (when-not (table? state) "hidden")
+       ;; :style (when-not (table? slate) #js {:display "none"})
+       }
       [toolbar-buttons
        {:btn-list-md context-transforms
+        :state state
         :on-mouse-down (partial on-click-context state)
-        :active? false}]]]
-    ))
+        :active? false}]]]))
 
 ;;;;;;;;;;;;
 ;; editor ;;
@@ -339,6 +428,12 @@
                   (clj->js attrs)
                   children))
 
+(defn a-plugin [options]
+  {:onKeyDown (fn [event data state]
+                (.preventDefault event)
+                (transform-state state (fn [transform]
+                                         (.toggleMark transform "underline"))))})
+
 
 (defn slate-editor [state]
   (jsx "div"
@@ -346,7 +441,7 @@
        (jsx (.-Editor slate)
             {:state @state
              :schema (schema/slate)
-             :plugins [ edit-table-plugin ]
+             :plugins [ edit-table-plugin, a-plugin ]
              :placeholder "Compose an epic"
              :onChange #(reset! state %)})))
 
