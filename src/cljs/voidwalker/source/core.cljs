@@ -63,9 +63,7 @@
   (let [url (r/atom url)
         tags (r/atom tags)
         title (r/atom title)
-        content (r/atom (if content
-                          (e/deserialize-state content)
-                          (e/empty-state)))
+        content (r/atom content)
         post-status (rf/subscribe [:new/post-status])]
     (fn []
       ;;todo clean this up
@@ -73,7 +71,7 @@
         (do (reset! url "")
             (reset! tags "")
             (reset! title "")
-            (reset! content (e/empty-state))))
+            (reset! content "")))
       [:div.container
        [:h1 "New Article"]
        [:form
@@ -83,9 +81,7 @@
                 :state tags}]
         [input {:placeholder "Enter title"
                 :state title}]
-        [:div.form-group [e/editor
-                          {:id "my-quill-editor-component-id"
-                           :content content}]]
+        [e/editor content]
         [:div.form-group>button.btn.btn-primary
          {:on-click (fn [e]
                       (.preventDefault e)
@@ -93,7 +89,7 @@
                                     {:url @url
                                      :id id
                                      :tags @tags
-                                     :content (e/get-serialized-state @content)
+                                     :content @content
                                      :title @title}]))}
          "Save article"]
         [progress-info @post-status]]])))
@@ -102,9 +98,10 @@
 (defn add-post
   ([] (add-post-form))
   ([id] (let [article-data @(rf/subscribe [:article id])]
-          (if (e/json? (:content article-data))
-            (add-post-form :data article-data)
-            [:h1 "This article is not supported by this editor."]))))
+
+          (add-post-form :data article-data)
+          ;; [:h1 "This article is not supported by this editor."]
+          )))
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;
