@@ -24,5 +24,5 @@
 
 (defn editor [content]
   [mc-editor {:content @content
-              :on-change (fn [e]
-                           (reset! content (-> e .-target .getContent)))}])
+              :on-change (fn [e])}])
+                           ;(reset! content (-> e .-target .getContent)))}])

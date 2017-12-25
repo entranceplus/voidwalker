@@ -5,6 +5,8 @@
             [voidwalker.config :refer [env]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
+            [migratus.core :as migratus]
+            [cprop.core :refer [load-config]]
             [mount.core :as mount])
   (:gen-class))
 
@@ -49,5 +51,18 @@
     (log/info component "started"))
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
+;; (load-config)
+
+(def config {:store                :database
+             :migration-dir        "migrations/"
+             :db {:classname   "org.mysql.Driver"
+                  :subprotocol "mysql"
+                  :dbtype "mysql"
+                  :dbname "voidwalker"
+                  :host "db"
+                  :user "root"
+                  :password "walker"}})
+
 (defn -main [& args]
+  (migratus/migrate config)
   (start-app args))

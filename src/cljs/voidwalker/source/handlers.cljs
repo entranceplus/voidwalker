@@ -47,7 +47,7 @@
  (fn [_ _]
    (println "calling get articles")
    {:http-xhrio (new-request {:method :get
-                              :uri "/article"
+                              :uri "/articles"
                               :on-success [:set-article]})}))
 
 (reg-event-db
@@ -64,7 +64,7 @@
  :save-article
  (fn [{:keys [db]} [_ article]]
    {:http-xhrio (new-request {:method :post
-                              :uri "/article"
+                              :uri "/articles"
                               :params article
                               :on-success [:article-saved]
                               :on-failure [:error-post]})

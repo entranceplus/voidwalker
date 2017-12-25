@@ -21,6 +21,7 @@
                  [cljsjs/slate "0.20.3-0"]
                  [mount "0.1.11"]
                  [migratus "0.9.7"]
+                 [ring-cors "0.1.11"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [cljsjs/quill "1.2.5-4"]
@@ -52,11 +53,10 @@
 
   :migratus {:store :database
              :migration-dir "migrations"
-             :db {:classname "com.mysql.jdbc.Driver"
-                  :subprotocol "mysql"
-                  :subname "//localhost/voidwalker"
-                  :user "root"
-                  :password ""}}
+             :db {:dbtype "mysql"
+                  :dbname "voidwalker"
+                  :user "void"
+                  :password "walker"}}
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-immutant "2.1.0"]
@@ -122,6 +122,7 @@
                                  [ring/ring-devel "1.6.1"]
                                  [pjstadig/humane-test-output "0.8.2"]
                                  [metosin/muuntaja "0.3.1"]
+                                 [proto-repl "0.3.1"]
                                  [binaryage/devtools "0.9.4"]
                                  [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
                                  [doo "0.1.7"]

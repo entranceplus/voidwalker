@@ -14,9 +14,9 @@
             [voidwalker.source.editor.core :as e]
             [clojure.core.async :as async]
             [voidwalker.source.subscriptions]
-            [voidwalker.source.util :refer [get-value]]
+            [voidwalker.source.util :refer [get-value]])
             ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
-            )
+
   (:import goog.History))
 
 (defn about-page []
@@ -81,7 +81,7 @@
                 :state tags}]
         [input {:placeholder "Enter title"
                 :state title}]
-        [e/editor content]
+        [:div.form-group (e/editor content)]
         [:div.form-group>button.btn.btn-primary
          {:on-click (fn [e]
                       (.preventDefault e)
@@ -99,9 +99,9 @@
   ([] (add-post-form))
   ([id] (let [article-data @(rf/subscribe [:article id])]
 
-          (add-post-form :data article-data)
+          (add-post-form :data article-data))))
           ;; [:h1 "This article is not supported by this editor."]
-          )))
+
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;

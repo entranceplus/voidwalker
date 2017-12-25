@@ -12,3 +12,5 @@ profiles.clj
 *.log
 /log
 /node_modules
+.mach
+public/js/bundle.js

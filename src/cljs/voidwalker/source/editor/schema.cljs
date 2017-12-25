@@ -53,14 +53,14 @@
            :table {:body (element "tbody")
                    :icon-name "view_module"}
            :table_row {:body (element "tr")}
-           :table_cell {:body (element "td")}
-}
+           :table_cell {:body (element "td")}}
+
    :marks {:bold {:fontWeight "bold"
                   :icon-name "format_bold"}
            :italic {:fontStyle "italic"
                     :icon-name "format_italic"}
            :underlined {:textDecoration "underline"
-                       :icon-name "format_underlined"}
+                        :icon-name "format_underlined"}
            :font-size {:body (element "span"
                                       (fn [props]
                                         {:style {:fontSize (.get (.. props -mark -data)
@@ -85,7 +85,7 @@
                                     body
                                     (val node))}))
           {}
-             app-nodes))
+          app-nodes))
 
 (defn app->slate [{:keys [nodes marks] :as schema}]
   "prepare schema for slate consumption. Consumption schema format requires

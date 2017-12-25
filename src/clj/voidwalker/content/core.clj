@@ -32,7 +32,7 @@
       (response/header "Content-Type" "application/json; charset=utf-8")))
 
 (defroutes content-routes
-  (context "/article" []
+  (context "/articles" []
            (GET "/" {{:keys [url]}  :params}
                 (let [posts (if (nil? url)
                               (get-post)

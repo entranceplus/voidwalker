@@ -24,7 +24,7 @@ create profiles.clj with following contents
 
 {:profiles/dev  {:env
                  {:database-url
-                  "jdbc:mysql://localhost:3306/voidwalker?user=root&password="}}
+                  "jdbc:mysql://localhost:3306/voidwalker?user=root&passd="}}
 
  :profiles/test {:env
                  {:database-url
