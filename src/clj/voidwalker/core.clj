@@ -51,18 +51,17 @@
     (log/info component "started"))
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
-;; (load-config)
-
-(def config {:store                :database
-             :migration-dir        "migrations/"
-             :db {:classname   "org.mysql.Driver"
-                  :subprotocol "mysql"
-                  :dbtype "mysql"
-                  :dbname "voidwalker"
-                  :host "db"
-                  :user "root"
-                  :password "walker"}})
+(defn config []
+  {:store                :database
+   :migration-dir        "migrations/"
+   :db (merge {:classname   "org.mysql.Driver"
+               :subprotocol "mysql"
+               :dbtype "mysql"}
+              (:db (load-config)))})
 
 (defn -main [& args]
-  (migratus/migrate config)
+  ;; run migrations from here
+  (println "db config for migrations is " (config))
+  (migratus/migrate (config))
   (start-app args))
+
