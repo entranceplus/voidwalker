@@ -8,4 +8,4 @@
                 :password (fetch-conf [:db :password])
                 :db (fetch-conf [:db :dbname])})
 
-(korma.db/defdb dbcon (korma.db/mysql db-config))
+(korma.db/defdb db (korma.db/postgres db-config))

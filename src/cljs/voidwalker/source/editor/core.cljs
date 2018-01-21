@@ -17,12 +17,25 @@
 ;;         ~else)
 ;;      then)))
 
-(def mc-editor (r/adapt-react-class (aget js/window "deps" "react-tinymce")))
+;; (def mc-editor [:> (aget js/window "deps" "react-tinymce") {:content (or @content "")
+;;                                                             :initial-value "Welcome"
+;;                                                             ;; :init   {:selector "#editor"
+;;                                                             ;;          :plugins "link table image code"}
+;;                                                             :init  {:plugins "code"}
+;;                                                             :on-change (fn [e] (reset! content (-> e .-target .getContent)))}])
 
 (defn init-tinymce [comp]
-  (.init js/tinymce #js {:selector "#editor"}))
+  (.init js/tinymce #js {:selector "#editor"
+                         :plugins ["table"]
+                         :menubar "table"
+                         :toolbar "table"}))
+
+(def tinymce (aget js/window "deps" "react-tinymce"))
 
 (defn editor [content]
-  [mc-editor {:content @content
-              :on-change (fn [e])}])
-                           ;(reset! content (-> e .-target .getContent)))}])
+  (fn []
+    [:> tinymce
+      {:content (or @content "")
+       :initial-value "Welcome"
+       :init  {"plugins" "table"}
+       :on-change (fn [e] (reset! content (-> e .-target .getContent)))}]))

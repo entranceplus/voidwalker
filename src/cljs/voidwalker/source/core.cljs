@@ -81,10 +81,11 @@
                 :state tags}]
         [input {:placeholder "Enter title"
                 :state title}]
-        [:div.form-group (e/editor content)]
+        [:div.form-group [(e/editor content)]]
         [:div.form-group>button.btn.btn-primary
          {:on-click (fn [e]
                       (.preventDefault e)
+                      (println "content " @content)
                       (rf/dispatch [:save-article
                                     {:url @url
                                      :id id
@@ -94,14 +95,12 @@
          "Save article"]
         [progress-info @post-status]]])))
 
-
 (defn add-post
   ([] (add-post-form))
   ([id] (let [article-data @(rf/subscribe [:article id])]
 
           (add-post-form :data article-data))))
           ;; [:h1 "This article is not supported by this editor."]
-
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;

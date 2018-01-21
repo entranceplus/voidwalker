@@ -17,8 +17,9 @@
                  [metosin/ring-http-response "0.9.0"]
                  [venantius/accountant "0.2.0"]
                  [korma "0.4.3"]
-                 [mysql/mysql-connector-java "6.0.5"]
+                 [snow "0.1.0-SNAPSHOT"]
                  [cljsjs/slate "0.20.3-0"]
+                 [org.postgresql/postgresql "9.4-1201-jdbc41"]
                  [mount "0.1.11"]
                  [migratus "0.9.7"]
                  [ring-cors "0.1.11"]
@@ -27,7 +28,7 @@
                  [cljsjs/quill "1.2.5-4"]
                  [day8.re-frame/http-fx "0.1.3"]
                  [org.clojure/core.async "0.3.443"]
-                 [org.clojure/clojurescript "1.9.562" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.webjars.bower/tether "1.4.0"]
@@ -53,9 +54,12 @@
 
   :migratus {:store :database
              :migration-dir "migrations"
-             :db {:dbtype "mysql"
+             :db {:classname   "org.postgresql.Driver"
+                  :dbtype "postgresql"
+                  :subprotocol "postgresql"
                   :dbname "voidwalker"
                   :user "void"
+                  :host "localhost"
                   :password "walker"}}
 
   :plugins [[lein-cljsbuild "1.1.6"]
@@ -89,6 +93,9 @@
                                       :provides ["cljsjs.react"
                                                  "cljsjs.react.dom"
                                                  "webpack.bundle"]}]
+                      :npm-deps {:react "15.6.1"
+                                 :react-dom "15.6.1"
+                                 :react-tinymce "0.7.0"}
                       :optimizations :whitespace
                       :pretty-print false}}
                     :client
