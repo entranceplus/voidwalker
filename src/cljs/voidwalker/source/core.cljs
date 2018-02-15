@@ -1,20 +1,17 @@
 (ns voidwalker.source.core
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
-            [secretary.core :as secretary]
+
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
-            [markdown.core :refer [md->html]]
+
             [ajax.core :refer [GET POST]]
             [voidwalker.source.ajax :refer [load-interceptors!]]
             [voidwalker.source.handlers]
-            [accountant.core :as accountant]
-            [cljsjs.quill]
-            [voidwalker.source.quill :as q]
-            [voidwalker.source.editor.core :as e]
-            [clojure.core.async :as async]
             [voidwalker.source.subscriptions]
-            [voidwalker.source.util :refer [get-value]])
+            [voidwalker.source.util :refer [get-value]]
+            [voidwalker.source.routes :refer [nav-link]]
+            react-tinymce)
             ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
 
   (:import goog.History))
@@ -27,19 +24,32 @@
 
 (defn navbar []
   [:nav.navbar.navbar-default>div.container-fluid
-   [:div.navbar-header>a.navbar-brand {:href "/"} "Entranceplus"]
+   [:div.navbar-header>span.navbar-brand [nav-link {:route :voidwalker.home
+                                                    :text "Entranceplus"}]]
    [:div.nav.navbar-nav
     [:li {:class (when (= @(rf/subscribe [:page]) :add)
                    "active")}
-     [:a {:href "/add"} "Add"]]]])
+     [nav-link {:route :voidwalker.add
+                :text "Add"}]]]])
 
 
 (defn input [{:keys [state placeholder type]}]
+  (println "State for " placeholder @state)
   [:div.form-group [:input.form-control
                     {:placeholder placeholder
                      :value @state
                      :type (or type "text")
                      :on-change #(reset! state (-> % get-value))}]])
+
+
+(defn editor [content]
+  (fn []
+    [:> react-tinymce
+     {:content (or @content "")
+      :initial-value "Welcome"
+      :init  {"plugins" "table"}
+      :on-change (fn [e] (reset! content (-> e .-target .getContent)))}]))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; new article form ;;
@@ -60,125 +70,52 @@
 
 
 (defn add-post-form [& {{:keys [url tags content title id]} :data}]
-  (let [url (r/atom url)
+  (r/with-let [url (r/atom url)
         tags (r/atom tags)
         title (r/atom title)
         content (r/atom content)
         post-status (rf/subscribe [:new/post-status])]
-    (fn []
-      ;;todo clean this up
-      (when (= @post-status :success)
-        (do (reset! url "")
-            (reset! tags "")
-            (reset! title "")
-            (reset! content "")))
-      [:div.container
-       [:h1 "New Article"]
-       [:form
-        [input {:state url
-                :placeholder "Enter url"}]
-        [input {:placeholder "Comma separated keywords/tags"
-                :state tags}]
-        [input {:placeholder "Enter title"
-                :state title}]
-        [:div.form-group [(e/editor content)]]
-        [:div.form-group>button.btn.btn-primary
-         {:on-click (fn [e]
-                      (.preventDefault e)
-                      (println "content " @content)
-                      (rf/dispatch [:save-article
-                                    {:url @url
-                                     :id id
-                                     :tags @tags
-                                     :content @content
-                                     :title @title}]))}
-         "Save article"]
-        [progress-info @post-status]]])))
+    (println "passed data url: " @url @post-status)
+    [:div.container
+     [:h1 "New Article"]
+     [:form
+      [input {:state url
+              :placeholder "Enter url"}]
+      [input {:placeholder "Comma separated keywords/tags"
+              :state tags}]
+      [input {:placeholder "Enter title"
+              :state title}]
+      [:div.form-group [(editor content)]]
+      [:div.form-group>button.btn.btn-primary
+       {:on-click (fn [e]
+                    (.preventDefault e)
+                    (println "content " @content)
+                    (rf/dispatch [:save-article
+                                  {:url @url
+                                   :id id
+                                   :tags @tags
+                                   :content @content
+                                   :title @title}]))}
+       "Save article"]
+      [progress-info @post-status]]]))
 
 (defn add-post
   ([] (add-post-form))
-  ([id] (let [article-data @(rf/subscribe [:article id])]
-
+  ([id] (r/with-let [article-data @(rf/subscribe [:article id])]
           (add-post-form :data article-data))))
-          ;; [:h1 "This article is not supported by this editor."]
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;
 ;;;;;;;;;;;;;;;
 
 (defn home-page []
-  [:div.container
-   [:h1 "List of Posts"]
-   (map (fn [{:keys [title id]}]
-          [:div
-           {:on-click #(do (rf/dispatch [:set-active-page :edit id])
-                           (accountant/navigate! (str "/edit/" id)))
-            :key id}
-           title])
-        @(rf/subscribe [:articles]))])
-
-
-(defn pages [{:keys [page page-param]}]
   (fn []
-    (case page
-      :home (home-page)
-      :add (add-post)
-      :edit (add-post page-param))))
-
-
-(defn page []
-  [:div
-   [navbar]
-   [(pages @(rf/subscribe [:page]))]])
-
-;;;;;;;;;;;;
-;; routes ;;
-;;;;;;;;;;;;
-
-(secretary/set-config! :prefix "")
-
-(secretary/defroute "/" []
-  (rf/dispatch [:set-active-page :home]))
-
-(secretary/defroute "/add" []
-  (rf/dispatch [:set-active-page :add]))
-
-(secretary/defroute "/about" []
-  (rf/dispatch [:set-active-page :about]))
-
-(secretary/defroute "/edit/:id" {id :id}
-  (rf/dispatch [:set-active-page :edit id]))
-
-(accountant/configure-navigation! {:nav-handler  (fn [path]
-                                                   (secretary/dispatch! path))
-                                   :path-exists? (fn [path]
-                                                   (secretary/locate-route path))})
-;; -------------------------
-;; History
-;; must be called after routes have been defined
-(defn hook-browser-navigation! []
-  (doto (History.)
-    (events/listen
-      HistoryEventType/NAVIGATE
-      (fn [event]
-        (secretary/dispatch! (.-token event))))
-    (.setEnabled true)))
-
-(.addEventListener js/document
-                   "DOMContentLoaded"
-                   #(do (println "dom loaded" (.. js/document -location -pathname))
-                        (secretary/dispatch! (.. js/document -location -pathname))))
-
-;; -------------------------
-;; Initialize app
-
-(defn mount-components []
-  (rf/clear-subscription-cache!)
-  (r/render [#'page] (.getElementById js/document "app")))
-
-(defn init! []
-  (rf/dispatch-sync [:initialize-db])
-  (load-interceptors!)
-  ;; (enable-re-frisk-remote!)
-  (hook-browser-navigation!)
-  (mount-components))
+    [:div.container
+     [:h1 "List of Posts"]
+     (map (fn [{:keys [title id]}]
+            (println "keys are " title id)
+            [:div {:key id}
+             [nav-link {:route :voidwalker.edit
+                        :params {:id id}
+                        :text title}]])
+          @(rf/subscribe [:articles]))]))

@@ -1,8 +1,0 @@
-{:env :dev
- :port 8000
- ;; when :nrepl-port is set the application starts the nREPL server on load
- :nrepl-port 7000
- :db {:db "voidwalker"
-      :dbuser "void"
-      :host "127.0.0.1"
-      :password "walker"}}

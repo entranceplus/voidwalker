@@ -32,10 +32,11 @@
   :set-active-page
   (fn [{:keys [db]} [_ page param]]
     (let [db (assoc db :page page :page-param param)]
+      (println "setting page " page)
       (case page
-        :home {:dispatch [:get-articles]
-               :db db}
-        (:add :edit) {:db (dissoc db :new/post-status)}
+        :voidwalker.home {:dispatch [:get-articles]
+                          :db db}
+        (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
         {:db db}))))
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -74,6 +75,12 @@
  :article-saved
  (fn [db _]
    (assoc db :new/post-status :success)))
+
+(reg-event-db
+ :post-status-init
+ (fn [db _]
+   (println "post status init")
+   (dissoc db :new/post-status)))
 
 
 (reg-event-db

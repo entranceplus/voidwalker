@@ -1,6 +1,0 @@
-{:env :prod
- :port 3000
- :db {:dbname "voidwalker"
-      :user "root"
-      :host "db"
-      :password "walker"}}

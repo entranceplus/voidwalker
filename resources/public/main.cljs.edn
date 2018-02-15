@@ -1,0 +1,5 @@
+{:require [voidwalker.source.app]
+ :compiler-options  {:asset-path "main.out"
+                     :install-deps true
+                     :npm-deps {:react-tinymce "0.7.0"
+                                :react "15.4.2"}}}
