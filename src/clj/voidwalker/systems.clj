@@ -10,6 +10,7 @@
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [snow.db :as db]
+            [snow.systems :as system]
             [voidwalker.content :refer [content-routes]]
             (system.components
              [postgres :refer [new-postgres-database]]
@@ -25,20 +26,24 @@
                          :formats [:json-kw]
                          :response-options {:json-kw {:pretty true}})))
 
+(defn system-config [config]
+  [:site-endpoint (component/using (new-endpoint site)
+                                   [:site-middleware])
+   :db (new-postgres-database (db/get-db-spec-from-env :config config))
+   :api-endpoint (component/using (new-endpoint content-routes)
+                                  [:api-middleware :db])
+   :site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
+   :api-middleware (new-middleware
+                    {:middleware  [rest-middleware
+                                   [wrap-defaults api-defaults]]})
+   :handler (component/using (new-handler) [:api-endpoint :site-endpoint])
+   :api-server (component/using (new-immutant-web :port (Integer. (config :http-port))
+                                                  )
+
+                                [:handler])])
+
 (defn dev-system []
-    (component/system-map
-     :site-endpoint (component/using (new-endpoint site)
-                                     [:site-middleware])
-     :db (new-postgres-database (db/get-db-spec-from-env))
-     :api-endpoint (component/using (new-endpoint content-routes)
-                                    [:api-middleware :db])
-     :site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
-     :api-middleware (new-middleware
-                      {:middleware  [rest-middleware
-                                     [wrap-defaults api-defaults]]})
-     :handler (component/using (new-handler) [:api-endpoint :site-endpoint])
-     :api-server (component/using (new-immutant-web :port (Integer. (env :http-port)))
-                                  [:handler])))
+    (system/gen-system system-config))
 
 
 (defn prod-system

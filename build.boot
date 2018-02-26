@@ -42,12 +42,20 @@
          '[clojure.edn :as edn]
          '[environ.core :refer [env]]
          '[environ.boot :refer [environ]]
-         '[snow.boot :refer [profile]])
+         '[snow.boot :refer [profile migrate rollback]])
 
 (require '[adzerk.boot-cljs :refer :all]
          '[adzerk.boot-cljs-repl :refer :all]
          '[adzerk.boot-reload :refer :all])
 
+(task-options!
+ pom {:project     project
+      :version     version
+      :description "Voidwalker"
+      :url         "http://content.entranceplus.in"
+      :scm         {:url "https://github.com/entranceplus/voidwalker"}
+      :license     {"Eclipse Public License"
+                    "http://www.eclipse.org/legal/epl-v10.html"}})
 
 (deftask dev
   "run a restartable system"
@@ -78,6 +86,15 @@
      (sift :include #{#".*\.jar"})
      (target)
      (notify)))
+
+(deftask install-local
+  "Install jar locally"
+  []
+  (comp (cljs :source-map true
+           :optimizations :none)
+     (pom)
+     (jar)
+     (install)))
 
 (deftask run-project
   "Run the project."
