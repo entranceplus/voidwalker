@@ -37,8 +37,7 @@
                     {:middleware  [rest-middleware
                                    [wrap-defaults api-defaults]]})
    :handler (component/using (new-handler) [:api-endpoint :site-endpoint])
-   :api-server (component/using (new-immutant-web :port (Integer. (config :http-port))
-                                                  )
+   :api-server (component/using (new-immutant-web :port (Integer. (config :http-port)))
 
                                 [:handler])])
 
