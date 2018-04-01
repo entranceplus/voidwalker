@@ -4,7 +4,8 @@
 (set-env! :resource-paths #{"src/cljs" "src/clj" "resources"}
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
-                            [org.clojure/clojurescript "1.9.946"]
+                            [org.clojure/core.async "0.4.474"]
+                            [org.clojure/clojurescript "1.10.238"]
                             [org.immutant/immutant "2.1.9"]
                             [org.danielsz/system "0.4.2-SNAPSHOT"]
                             [org.clojure/java.jdbc "0.7.3"]
@@ -22,10 +23,12 @@
                             [adzerk/boot-test "1.2.0" :scope "test"]
                             [reagent "0.8.0-alpha2"]
                             [reagi "0.10.1"]
+                            [expound "0.5.0"]
                             [funcool/bide "1.6.0"]
                             [cljs-ajax "0.6.0"]
+                            [thheller/shadow-cljs "2.2.21"]
                             [day8.re-frame/http-fx "0.1.3"]
-                            [re-frame "0.9.4"]
+                            [re-frame "0.10.5"]
                             [adzerk/boot-reload "0.5.2" :scope "test"]
                             [adzerk/boot-test "1.2.0" :scope "test"]
                             [adzerk/boot-cljs "2.1.4" :scope "test"]
@@ -35,6 +38,8 @@
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
                             [snow "0.1.0-SNAPSHOT"]
+                            [figwheel-sidecar "0.5.7" :scope "test"]
+                            [ajchemist/boot-figwheel "0.5.4-6"]
                             [weasel "0.7.0" :scope "test"]])
 
 (require '[system.boot :refer [system run]]
@@ -48,6 +53,9 @@
          '[adzerk.boot-cljs-repl :refer :all]
          '[adzerk.boot-reload :refer :all])
 
+(require 'boot-figwheel)
+(refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
+
 (task-options!
  pom {:project     project
       :version     version
@@ -55,7 +63,20 @@
       :url         "http://content.entranceplus.in"
       :scm         {:url "https://github.com/entranceplus/voidwalker"}
       :license     {"Eclipse Public License"
-                    "http://www.eclipse.org/legal/epl-v10.html"}})
+                    "http://www.eclipse.org/legal/epl-v10.html"}}
+ figwheel
+ {:build-ids  ["dev"]
+  :all-builds [{:id "dev"
+                :source-paths ["src"]   ; cljs(cljc) directories
+                :compiler {:main 'voidwalker.source.app
+                           :output-to "resources/public/js/app.js"}
+                :figwheel {:build-id  "dev"
+                           :on-jsload 'voidwalker.source.app/main!
+                           :heads-up-display true
+                           :autoload true
+                           :debug false}}]
+  :figwheel-options {:open-file-command "emacsclient"
+                     :repl true}})
 
 (deftask dev
   "run a restartable system"
@@ -66,19 +87,21 @@
    (system :sys #'dev-system
            :auto true
            :files ["routes.clj" "systems.clj" "content.clj"])
-   (repl :server true
-         :host "127.0.0.1")
    (reload :asset-path "public")
-   (cljs-repl)
-   (cljs :source-map true
-         :optimizations :none)
+   ; (figwheel)
+   (repl :server true
+         :port 8001
+         :bind "0.0.0.0")
+   ; (cljs-repl)
+   ; (cljs :source-map true
+   ;       :optimizations :none)
    (notify)))
 
 (deftask build
   "Build the project locally as a JAR."
   []
   (comp (cljs :source-map true
-           :optimizations :none)
+              :optimizations :none)
      (aot :namespace #{'voidwalker.core})
      (uber)
      (jar :main 'voidwalker.core
@@ -91,7 +114,7 @@
   "Install jar locally"
   []
   (comp (cljs :source-map true
-           :optimizations :none)
+              :optimizations :none)
      (pom)
      (jar)
      (install)))

@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+
+    web:
+      build: .
+      depends_on:
+        - db
+      ports:
+        - "7000:7000"
+        - "3000:3000"
+        - "7888:7888"
+      volumes:
+        - "~/.m2:/root/.m2/"
+      environment:
+        DATABASE_URL: "jdbc:mysql://localhost:3306/voidwalker?user=void&pass=walker"
+
+    db:
+      image: mysql
+      restart: always
+      ports:
+       - "3306:3306"
+      environment:
+        MYSQL_USER: void
+        MYSQL_ROOT_PASSWORD: walker
+        MYSQL_DATABASE: voidwalker

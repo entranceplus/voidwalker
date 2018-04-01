@@ -13,4 +13,9 @@ profiles.clj
 /log
 /node_modules
 .mach
-public/js/bundle.js
+resources/public/js/out/
+.cpcache
+.shadow-cljs
+package-lock.json
+.nrepl-history
+profiles.edn

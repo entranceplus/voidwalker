@@ -16,7 +16,6 @@
   (fn [_ _]
     db/default-db))
 
-
 ;; todo add better default error handling
 (reg-event-db
  :error-result

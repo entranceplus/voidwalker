@@ -1,0 +1,12 @@
+FROM postgres
+MAINTAINER Akash Shakdwipeea <ashakdwipeea@gmail.com>
+
+WORKDIR /docker-entrypoint-initdb.d
+
+COPY resources/migration.sql .
+
+ENV POSTGRES_USER void
+ENV POSTGRES_PASSWORD walker
+ENV POSTGRES_DB voidwalker
+
+EXPOSE 5432

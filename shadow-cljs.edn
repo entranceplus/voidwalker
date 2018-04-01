@@ -1,0 +1,26 @@
+;; shadow-cljs configuration
+{:source-paths ["src/cljs"]
+
+ :nrepl {:port 5000}
+ :http {:port 9000
+        :host "0.0.0.0"}
+
+
+ :dependencies [[reagent "0.8.0-alpha2"]
+                [reagi "0.10.1"]
+                [funcool/bide "1.6.0"]
+                [cljs-ajax "0.6.0"]
+                [day8.re-frame/http-fx "0.1.3"]
+                [re-frame "0.10.5"]]
+
+ :builds {:app {:target :browser
+                :output-dir "resources/public/js/out"
+                :asset-path "/js/out"
+                :modules
+                {:app
+                  {:entries [voidwalker.source.app]}}}}}
+
+        ;; start a development http server on http://localhost:8020
+        ; :devtools
+        ; {:http-root "public"
+        ;  :http-port 8020}}}}

@@ -10,10 +10,8 @@
             [voidwalker.source.handlers]
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
-            [voidwalker.source.routes :refer [nav-link]]
-            react-tinymce)
-            ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
-
+            [voidwalker.source.routes :refer [nav-link]])
+  (:require ["@tinymce/tinymce-react" :refer (Editor)])
   (:import goog.History))
 
 (defn about-page []
@@ -41,15 +39,13 @@
                      :type (or type "text")
                      :on-change #(reset! state (-> % get-value))}]])
 
-
 (defn editor [content]
   (fn []
-    [:> react-tinymce
-     {:content (or @content "")
+    [(r/adapt-react-class Editor)
+     {:content (or @content "Go fuck")
       :initial-value "Welcome"
-      :init  {"plugins" "table"}
+      :init  {"plugins" "link image table"}
       :on-change (fn [e] (reset! content (-> e .-target .getContent)))}]))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; new article form ;;
@@ -71,10 +67,10 @@
 
 (defn add-post-form [& {{:keys [url tags content title id]} :data}]
   (r/with-let [url (r/atom url)
-        tags (r/atom tags)
-        title (r/atom title)
-        content (r/atom content)
-        post-status (rf/subscribe [:new/post-status])]
+               tags (r/atom tags)
+               title (r/atom title)
+               content (r/atom content)
+               post-status (rf/subscribe [:new/post-status])]
     (println "passed data url: " @url @post-status)
     [:div.container
      [:h1 "New Article"]
