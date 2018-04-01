@@ -1,7 +1,7 @@
 # Voidwalker
 <img src="http://i.imgur.com/yfHO418.jpg" align="top" height=250 />
 
-Voidwalker is a simple cms. Write, publish and edit markdown.
+Voidwalker is a simple cms.
 
 ## Prerequisites
 
