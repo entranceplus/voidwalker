@@ -21,23 +21,34 @@
      [:img {:src (str js/context "/img/warning_clojure.png")}]]]])
 
 (defn navbar []
-  [:nav.navbar.navbar-default>div.container-fluid
-   [:div.navbar-header>span.navbar-brand [nav-link {:route :voidwalker.home
-                                                    :text "Entranceplus"}]]
-   [:div.nav.navbar-nav
-    [:li {:class (when (= @(rf/subscribe [:page]) :add)
-                   "active")}
+  [:nav.navbar.is-black
+   [:div.navbar-brand
+    [nav-link {:route :voidwalker.home
+               :nav? true
+               :image {:src "https://entranceplus.in/images/header/ep-logo-white.svg"
+                       :width "112"
+                       :height "48"}}]]
+   ;
+   ; [:div {:class (when (= @(rf/subscribe [:page]) :add
+   ;                             "is-active"))}
+   [:div.navbar-menu>div.navbar-start
      [nav-link {:route :voidwalker.add
-                :text "Add"}]]]])
+                :text "Add"
+                :nav? true}]]])
 
 
-(defn input [{:keys [state placeholder type]}]
+(defn input [{:keys [state placeholder type class]}]
   (println "State for " placeholder @state)
-  [:div.form-group [:input.form-control
-                    {:placeholder placeholder
-                     :value @state
-                     :type (or type "text")
-                     :on-change #(reset! state (-> % get-value))}]])
+  [:div.field>div.control [:input.input
+                           {:placeholder (when-not (= type "file") placeholder)
+                            :class class
+                            :value @state
+                            :type (or type "text")
+                            :on-change #(reset! state (-> % get-value))}]
+                          (when (= type "file")
+                            [:span.file-cta
+                             [:span.file-icon>i.fas.fa-upload]
+                             [:span.file-lable placeholder]])])
 
 (defn editor [content]
   (fn []
@@ -70,10 +81,11 @@
                tags (r/atom tags)
                title (r/atom title)
                content (r/atom content)
+               file (r/atom "")
                post-status (rf/subscribe [:new/post-status])]
     (println "passed data url: " @url @post-status)
-    [:div.container
-     [:h1 "New Article"]
+    [:div.section>div.container
+     [:div.title "New Article"]
      [:form
       [input {:state url
               :placeholder "Enter url"}]
@@ -81,8 +93,13 @@
               :state tags}]
       [input {:placeholder "Enter title"
               :state title}]
-      [:div.form-group [(editor content)]]
-      [:div.form-group>button.btn.btn-primary
+      [:div.field [(editor content)]]
+      [:div.field.file.is-boxed>label.file-label
+       [input {:type "file"
+               :class "file-input"
+               :state file
+               :placeholder "Add a datasource"}]]
+      [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
                     (.preventDefault e)
                     (println "content " @content)
@@ -106,11 +123,11 @@
 
 (defn home-page []
   (fn []
-    [:div.container
-     [:h1 "List of Posts"]
+    [:section.section>div.container
+     [:h1.title "List of Posts"]
      (map (fn [{:keys [title id]}]
             (println "keys are " title id)
-            [:div {:key id}
+            [:ul {:key id}
              [nav-link {:route :voidwalker.edit
                         :params {:id id}
                         :text title}]])

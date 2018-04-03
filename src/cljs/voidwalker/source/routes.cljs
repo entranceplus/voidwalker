@@ -15,12 +15,16 @@
 
 (def router (make-bide-router route-map))
 
-(defn nav-link [{:keys [route text params]}]
+(defn nav-link [{:keys [route text params image nav? class]}]
+  (println "texts is " text)
   [:a {:href (route route-map)
+       :class (or class
+                  (when nav? "navbar-item is-hoverable"))
        :on-click (fn [e]
                    (do
                      (-> e .preventDefault)
                      (println "clicked " route router)
                      (b/navigate! router route params)))}
-   text])
-
+      (if (some? text)
+          text
+          [:img image])])
