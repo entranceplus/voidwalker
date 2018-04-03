@@ -3,6 +3,7 @@
             [compojure.core :refer [context defroutes GET POST routes]]
             [ring.util.http-response :as response]
             [snow.db :as dbutil]
+            [environ.core :refer [env]]
             [clojure.java.jdbc :as jdbc]))
 
 (defn add-post [db {:keys [url content title tags id] :as post}]
@@ -48,6 +49,8 @@
   (-> response
       (response/header "Content-Type" "application/json; charset=utf-8")))
 
+(def tempfile "")
+
 (defn content-routes [{db :db}]
   (routes
    (context "/articles" []
@@ -55,4 +58,6 @@
                  (send-response (response/ok (get-post db :id id))))
             (POST "/" {post :params}
                   (add-post db post)
-                  (send-response (response/ok {:msg "Post added"}))))))
+                  (send-response (response/ok {:msg "Post added"})))
+            (POST "/file" {:keys [body]}
+                  (send-response (response/ok (slurp body)))))))

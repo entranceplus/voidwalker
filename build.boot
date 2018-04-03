@@ -23,6 +23,7 @@
                             [adzerk/boot-test "1.2.0" :scope "test"]
                             [reagent "0.8.0-alpha2"]
                             [reagi "0.10.1"]
+                            [proto-repl "0.3.1"]
                             [expound "0.5.0"]
                             [funcool/bide "1.6.0"]
                             [cljs-ajax "0.6.0"]
@@ -38,6 +39,7 @@
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
                             [snow "0.1.0-SNAPSHOT"]
+                            [amazonica "0.3.121"]
                             [figwheel-sidecar "0.5.7" :scope "test"]
                             [ajchemist/boot-figwheel "0.5.4-6"]
                             [weasel "0.7.0" :scope "test"]])
