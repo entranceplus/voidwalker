@@ -38,29 +38,6 @@
                 :text "Add"
                 :nav? true}]]])
 
-(defn get-files [e]
-  (array-seq (.. e -target -files)))
-
-(defn read-file
-  "read file and dispatch an event of [:file-content {:id :content}]"
-  [file id c]
-  (println "Trying to read file type " (.-type file))
-  (let [reader (js/FileReader.)]
-    (gobj/set reader
-              "onload"
-              (fn [e]
-                (println "event called ")
-                (go (>! c {:file-content {:id id
-                                          :data (.. e -target -result)}}))))
-    (.readAsText reader file)))
-
-; (defn process-file
-;   [{{:keys [id content]} :file-content :as data}]
-;   (println "The id is " id "and content is " content)
-;   data)
-;
-; (def file-processor (map process-file))
-
 (def fcon (r/atom {:id 1}))
 
 (def ^:private newlines
@@ -100,18 +77,42 @@
   [content wb]
   "This is a transducer which will read data from the wb atom and
    write data to content atom"
-  (map (fn [{{:keys [id data]} :file-content}]
+  (map (fn [{data :file-content}]
          (reset! content (append-data @wb data)))))
 
-(defn file-input [{placeholder :placeholder} c]
-  [:div.field>div.control
-   [:input.input.file-input
-    {:type "file"
-     :on-change (fn [e]
-                  (-> e get-files first (read-file :datasource c)))}]
-   [:span.file-cta
-     [:span.file-icon>i.fas.fa-upload]
-     [:span.file-lable placeholder]]])
+(defn get-files [e]
+  (array-seq (.. e -target -files)))
+
+(defn read-file
+  "read file and dispatch an event of [:file-content {:id :content}]"
+  [file c]
+  (println "Trying to read file name " (.-name file))
+  (let [reader (js/FileReader.)]
+    (gobj/set reader
+              "onload"
+              (fn [e]
+                (println "event called ")
+                (go (>! c {:file-content (.. e -target -result)
+                           :name (.-name file)}))))
+    (.readAsText reader file)))
+
+; (defn process-file
+;   [{{:keys [id content]} :file-content :as data}]
+;   (println "The id is " id "and content is " content)
+;   data)
+;
+; (def file-processor (map process-file))
+
+(defn file-input [{:keys [placeholder id]} c]
+  [:div.field.file.is-boxed>label.file-label
+   [:div.field>div.control
+    [:input.input.file-input
+     {:type "file"
+      :on-change (fn [e]
+                   (-> e get-files first (read-file c)))}]
+    [:span.file-cta
+      [:span.file-icon>i.fas.fa-upload]
+      [:span.file-label placeholder]]]])
 
 
 (defn input [{:keys [state placeholder type class]}]
@@ -133,7 +134,7 @@
      [(r/adapt-react-class Editor)
       {:value @content
        :init  {"plugins" "link image table"
-               "height" 500}
+               "height" 200}
        :on-change (fn [e]
                     (reset! wb-atom (-> e .-target .getContent)))}]))
 
@@ -154,6 +155,36 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
+; <span class="icon is-large">
+;   <span class="fa-stack fa-lg">
+;     <i class="fas fa-camera fa-stack-1x"></i>
+;     <i class="fas fa-ban fa-stack-2x has-text-danger"></i>
+;   </span>
+; </span>
+(defn file-view [name ch]
+  [:div
+   [:div>span.icon.is-large
+    [:i.fab.fa-css3-alt.fa-3x]]
+   [:div name
+    [:span.icon.is-medium {:on-click #(go (>! ch name))}
+     [:i.fas.fa-trash-alt]]]])
+
+(defn delete-css
+  [files n]
+  "will delete file identified by n from files atom"
+  (remove #(= n (:name %)) files))
+
+(defn css-container
+  [files]
+  "A component containing upload button for css and the corres. file
+   indicators. Will have the files in files atom."
+   (r/with-let [ch (chan 10 (map #(swap! files conj %)))
+                del-ch (chan 10 (map (fn [name]
+                                       (swap! files delete-css name))))]
+     [:div.columns
+      [:div.column [file-input {:placeholder "Upload css"} ch]]
+      [:div.column (for [{:keys [name]} @files]
+                     [:div {:key name} [file-view name del-ch]])]]))
 
 
 (defn add-post-form [& {{:keys [url tags content title id]} :data}]
@@ -163,6 +194,7 @@
                content (r/atom content)
                wb (r/atom @content)
                file-chan (chan 10 (update-content content wb))
+               css-files (r/atom [])
                post-status (rf/subscribe [:new/post-status])]
     [:div.section>div.container
      [:div.title "New Article"]
@@ -174,16 +206,17 @@
       [input {:placeholder "Enter title"
               :state title}]
       [:div.field [(editor content wb)]]
-      [:div.field.file.is-boxed>label.file-label
-       [file-input {:placeholder "Add a datasource"} file-chan]]
+      [file-input {:placeholder "Add a datasource"} file-chan]
+      [css-container css-files]
       [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
                     (.preventDefault e)
-                    (println "content " @wb)
+                    (println "cs " @css-files)
                     (rf/dispatch [:save-article
                                   {:url @url
                                    :id id
                                    :tags @tags
+                                   :css @css-files
                                    :content @wb
                                    :title @title}]))}
        "Save article"]
