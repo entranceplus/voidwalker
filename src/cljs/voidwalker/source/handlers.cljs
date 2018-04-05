@@ -87,3 +87,11 @@
  (fn [db _]
    (println "Error occurred")
    (assoc db :new/post-status :error)))
+
+
+;; FILES stuff
+
+(reg-event-db
+  :file-content
+  (fn [db [_ {:keys [id content]}]]
+    (assoc db id content)))
