@@ -10,6 +10,7 @@
             [voidwalker.source.ajax :refer [load-interceptors!]]
             [voidwalker.source.handlers]
             [cljs.core.async :refer [>! <! chan]]
+            [clojure.string :as str]
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
             [voidwalker.source.routes :refer [nav-link]])
@@ -178,23 +179,24 @@
   [files]
   "A component containing upload button for css and the corres. file
    indicators. Will have the files in files atom."
-   (r/with-let [ch (chan 10 (map #(swap! files conj %)))
-                del-ch (chan 10 (map (fn [name]
-                                       (swap! files delete-css name))))]
-     [:div.columns
-      [:div.column [file-input {:placeholder "Upload css"} ch]]
-      [:div.column (for [{:keys [name]} @files]
-                     [:div {:key name} [file-view name del-ch]])]]))
+  (r/with-let [ch (chan 10 (map #(swap! files conj %)))
+               del-ch (chan 10 (map (fn [name]
+                                      (swap! files delete-css name))))]
+    [:div.columns
+     [:div.column [file-input {:placeholder "Upload css"} ch]]
+     [:div.column>div.columns
+      (for [{:keys [name]} @files]
+        [:div.column {:key name} [file-view name del-ch]])]]))
 
 
-(defn add-post-form [& {{:keys [url tags content title id]} :data}]
+(defn add-post-form [& {{:keys [url tags content title id css]} :data}]
   (r/with-let [url (r/atom url)
                tags (r/atom tags)
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
                file-chan (chan 10 (update-content content wb))
-               css-files (r/atom [])
+               css-files (r/atom (map (fn [url] {:name url}) css))
                post-status (rf/subscribe [:new/post-status])]
     [:div.section>div.container
      [:div.title "New Article"]
@@ -215,7 +217,7 @@
                     (rf/dispatch [:save-article
                                   {:url @url
                                    :id id
-                                   :tags @tags
+                                   :tags (str/split @tags #",")
                                    :css @css-files
                                    :content @wb
                                    :title @title}]))}

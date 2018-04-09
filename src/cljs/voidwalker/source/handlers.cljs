@@ -53,7 +53,7 @@
 (reg-event-db
  :set-article
  (fn [db [_ articles]]
-   (assoc db :articles articles)))
+   (assoc db :articles (:articles articles))))
 
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -63,6 +63,7 @@
 (reg-event-fx
  :save-article
  (fn [{:keys [db]} [_ article]]
+   (println "article is " article)
    {:http-xhrio (new-request {:method :post
                               :uri "/articles"
                               :params article

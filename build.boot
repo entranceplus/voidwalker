@@ -23,8 +23,10 @@
                             [adzerk/boot-test "1.2.0" :scope "test"]
                             [reagent "0.8.0-alpha2"]
                             [reagi "0.10.1"]
+                            [io.replikativ/konserve "0.5-beta1"]
                             [proto-repl "0.3.1"]
                             [expound "0.5.0"]
+                            [nightlight "RELEASE" :scope "test"]
                             [funcool/bide "1.6.0"]
                             [cljs-ajax "0.6.0"]
                             [thheller/shadow-cljs "2.2.21"]
@@ -54,6 +56,8 @@
 (require '[adzerk.boot-cljs :refer :all]
          '[adzerk.boot-cljs-repl :refer :all]
          '[adzerk.boot-reload :refer :all])
+
+(require '[nightlight.boot :refer [nightlight]])
 
 (require 'boot-figwheel)
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
@@ -94,6 +98,7 @@
    (repl :server true
          :port 8001
          :bind "0.0.0.0")
+   (nightlight :port 5000)
    ; (cljs-repl)
    ; (cljs :source-map true
    ;       :optimizations :none)

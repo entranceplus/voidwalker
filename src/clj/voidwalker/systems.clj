@@ -18,7 +18,10 @@
              [repl-server :refer [new-repl-server]]
              [endpoint :refer [new-endpoint]]
              [middleware :refer [new-middleware]]
-             [handler :refer [new-handler]])))
+             [handler :refer [new-handler]]
+             [konserve :refer [new-konserve]]
+             [datahike :refer [new-datahike]])))
+
 
 (def rest-middleware
   (fn [handler]
@@ -26,12 +29,16 @@
                          :formats [:json-kw]
                          :response-options {:json-kw {:pretty true}})))
 
+;;(system.repl/system :conn)
+
+
 (defn system-config [config]
   [:site-endpoint (component/using (new-endpoint site)
                                    [:site-middleware])
+   :conn (new-konserve :type :filestore :path (config :db-path))
    :db (new-postgres-database (db/get-db-spec-from-env :config config))
    :api-endpoint (component/using (new-endpoint content-routes)
-                                  [:api-middleware :db])
+                                  [:api-middleware :conn])
    :site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
    :api-middleware (new-middleware
                     {:middleware  [rest-middleware

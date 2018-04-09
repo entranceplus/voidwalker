@@ -1,7 +1,7 @@
 (ns voidwalker.test.handler
   (:require [clojure.test :refer :all]
             [muuntaja.core :as muuntja]
-            [ring.mock.request :refer :all]
+            [snow.client :as client]
             [voidwalker.handler :refer :all]))
 
 (def m (muuntja/create))
@@ -29,4 +29,3 @@
     (let [response (json-request (request :get "/article"))]
       (is (and (seq? response)
                (contains-many? (first response) :url :content))))))
-
