@@ -133,7 +133,7 @@
 ; (h/pull @(get-conn) '[:_tags-sm] 10)
 ; (def post (add-post (get-conn) sample-post))
 ; (get-post (get-conn) (:id post))
-; (get-post (get-conn) nil)
+; (get-post (get-conn) {:id nil})
 
 ; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
 ; (<!! (k/get-in (get-conn) [::abc "def"]))
@@ -165,13 +165,16 @@
 ;       (or (some? id)
 ;           (some? url)) first)))
 (defn get-post
-  "get data pulled by query queried by id"
-  [store pid]
-  (if (some? pid)
-    (first (filter (fn [{:keys [id]}]
-                     (= pid id))
-                   (assoc-id (<!! (k/get-in store [::post])))))
-    (assoc-id (<!! (k/get-in store [::post])))))
+  ([store] (get-post store nil))
+  ([store q]
+   (if (or (some? (:id q))
+           (some? (:url q)))
+     (first (filter (fn [{:keys [id url]}]
+                      (if (some? (:id q))
+                          (= (:id q) id)
+                          (= (:url q) url)))
+                    (assoc-id (<!! (k/get-in store [::post])))))
+     (assoc-id (<!! (k/get-in store [::post]))))))
 
 ; (get-post (get-conn) {:id 43})
 ; (get-post (get-conn) nil)
@@ -209,7 +212,7 @@
    (context "/articles" []
             (GET "/" {{:keys [id]} :params}
                  (println "id is " id)
-                 (send-response (response/ok {:articles (get-post conn id)})))
+                 (send-response (response/ok {:articles (get-post conn {:id id})})))
             (POST "/" {{:keys [:id] :as post} :params}
                   (println "received params as " post)
                   (if (some? id)
