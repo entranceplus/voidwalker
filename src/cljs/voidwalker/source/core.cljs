@@ -17,6 +17,7 @@
   (:require ["@tinymce/tinymce-react" :refer (Editor)])
   (:import goog.History))
 
+
 (defn about-page []
   [:div.container
    [:div.row

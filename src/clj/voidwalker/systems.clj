@@ -19,8 +19,7 @@
              [endpoint :refer [new-endpoint]]
              [middleware :refer [new-middleware]]
              [handler :refer [new-handler]]
-             [konserve :refer [new-konserve]]
-             [datahike :refer [new-datahike]])))
+             [konserve :refer [new-konserve]])))
 
 
 (def rest-middleware

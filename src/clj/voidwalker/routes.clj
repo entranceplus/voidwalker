@@ -19,6 +19,7 @@
       response/ok
       (response/header "Content-Type" "text/html")))
 
+
 (defn site [_]
   (routes
    (GET "/" [] (home-page))

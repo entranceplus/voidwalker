@@ -1,7 +1,7 @@
 (def project 'voidwalker)
 (def version "0.1.0-SNAPSHOT")
 
-(set-env! :resource-paths #{"src/cljs" "src/clj" "resources"}
+(set-env! :resource-paths #{"src/cljs" "src/clj" "resources" "test/clj"}
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]
@@ -116,12 +116,14 @@
      (sift :include #{#".*\.jar"})
      (target)
      (notify)))
+; 
+; (cljs :source-map true
+;               :optimizations :none)
 
 (deftask install-local
   "Install jar locally"
   []
-  (comp (cljs :source-map true
-              :optimizations :none)
+  (comp
      (pom)
      (jar)
      (install)))

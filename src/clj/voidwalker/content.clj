@@ -6,7 +6,6 @@
             [snow.util :as u]
             [voidwalker.aws :as aws]
             [environ.core :refer [env]]
-            [datahike.api :as h]
             [konserve.core :as k]
             [clojure.core.async :as async :refer [<!!]]
             [clojure.set :as c.s]
@@ -45,8 +44,9 @@
   ; {:pre [(s/valid? spec data)]}
   (println "data to be inserted  is " data)
   (let [id (dbutil/uuid)]
-    (<!! (k/assoc-in conn [spec id] data))
-    id))
+    {:status (<!! (k/assoc-in conn [spec id] data))
+     :id id}))
+
 
 ; (transact-data (get-conn) ::new {:ac "def"})
 
@@ -105,7 +105,7 @@
                   :title "aas "
                   :tags ["abc"]})
 
-(def update-sample-post (assoc sample-post :css [{:name "http://a"}]))
+; (def update-sample-post (assoc sample-post :css [{:name "http://a"}]))
 ; (transact-data conn ::post)
 
 (defn process-css [css]
@@ -117,8 +117,8 @@
 
 
 (defn add-post [store {:keys [css] :as post}]
-  (add-data-with-id store ::post (merge (select-keys post [:url :content :title :tags :css])
-                                        {:css (process-css css)})))
+  (transact-data store ::post (merge (select-keys post [:url :content :title :tags :css])
+                                     {:css (process-css css)})))
 
 (defn update-post [store {:keys [url content title tags css] :as post} id]
   (update-data store ::post (merge post
@@ -133,7 +133,7 @@
 ; (h/pull @(get-conn) '[:_tags-sm] 10)
 ; (def post (add-post (get-conn) sample-post))
 ; (get-post (get-conn) (:id post))
-; (get-post (get-conn) {:id nil})
+; (get-post  (get-conn) {:id nil})
 
 ; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
 ; (<!! (k/get-in (get-conn) [::abc "def"]))

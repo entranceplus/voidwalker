@@ -19,3 +19,4 @@ resources/public/js/out/
 package-lock.json
 .nrepl-history
 profiles.edn
+void-konserve
