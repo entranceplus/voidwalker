@@ -1,8 +1,7 @@
 (def project 'voidwalker)
 (def version "0.1.0-SNAPSHOT")
 
-(set-env! :resource-paths #{"resources"}
-          :source-paths #{"src/clj" "src/cljs"}
+(set-env! :resource-paths #{"resources" "src/clj" "src/cljs"}
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]

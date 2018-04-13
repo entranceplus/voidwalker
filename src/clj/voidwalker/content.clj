@@ -20,7 +20,7 @@
 ;
 ; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
 ;
-(defn get-conn [] (-> system.repl/system :conn :store))
+; (defn get-conn [] (-> system.repl/system :conn :store))
 ;
 ; (h/q '[:find ?age
 ;        :where [?e :user/name "Akash"]
@@ -46,7 +46,6 @@
   (let [id (dbutil/uuid)]
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
-
 
 ; (transact-data (get-conn) ::new {:ac "def"})
 
