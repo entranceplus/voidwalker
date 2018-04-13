@@ -1,7 +1,8 @@
 (def project 'voidwalker)
 (def version "0.1.0-SNAPSHOT")
 
-(set-env! :resource-paths #{"src/cljs" "src/clj" "resources" "test/clj"}
+(set-env! :resource-paths #{"resources"}
+          :source-paths #{"src/clj" "src/cljs"}
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]
@@ -41,6 +42,7 @@
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
                             [snow "0.1.0-SNAPSHOT"]
+                            [adzerk/bootlaces "0.1.13"]
                             [amazonica "0.3.121"]
                             [figwheel-sidecar "0.5.7" :scope "test"]
                             [ajchemist/boot-figwheel "0.5.4-6"]
@@ -61,6 +63,9 @@
 
 (require 'boot-figwheel)
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
+
+(require '[adzerk.bootlaces :refer :all])
+(bootlaces! version :dont-modify-paths? true)
 
 (task-options!
  pom {:project     project
@@ -116,9 +121,14 @@
      (sift :include #{#".*\.jar"})
      (target)
      (notify)))
-; 
+;
 ; (cljs :source-map true
 ;               :optimizations :none)
+
+(deftask publish []
+  (comp (environ :env (snow.boot/profile))
+        (build-jar)
+        (push-snapshot)))
 
 (deftask install-local
   "Install jar locally"

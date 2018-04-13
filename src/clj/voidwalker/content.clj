@@ -213,7 +213,7 @@
             (GET "/" {{:keys [id]} :params}
                  (println "id is " id)
                  (send-response (response/ok {:articles (get-post conn {:id id})})))
-            (POST "/" {{:keys [:id] :as post} :params}
+            (POST "/" {{:keys [id] :as post} :params}
                   (println "received params as " post)
                   (if (some? id)
                     (handle-update-post conn post)
