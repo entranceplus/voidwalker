@@ -124,9 +124,11 @@
 ; (cljs :source-map true
 ;               :optimizations :none)
 
+(deftask deps [])
+
 (deftask publish []
-  (comp (environ :env (snow.boot/profile))
-        (build-jar)
+  (comp
+   (build-jar)
         (push-snapshot)))
 
 (deftask install-local
