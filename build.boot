@@ -129,7 +129,7 @@
 (deftask publish []
   (comp
    (build-jar)
-        (push-snapshot)))
+   (push-snapshot)))
 
 (deftask install-local
   "Install jar locally"
