@@ -35,7 +35,6 @@
   [:site-endpoint (component/using (new-endpoint site)
                                    [:site-middleware])
    :conn (new-konserve :type :filestore :path (config :db-path))
-   :db (new-postgres-database (db/get-db-spec-from-env :config config))
    :api-endpoint (component/using (new-endpoint content-routes)
                                   [:api-middleware :conn])
    :site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})

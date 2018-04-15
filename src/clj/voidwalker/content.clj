@@ -20,7 +20,7 @@
 ;
 ; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
 ;
-; (defn get-conn [] (-> system.repl/system :conn :store))
+(defn get-conn [] (-> system.repl/system :conn :store))
 ;
 ; (h/q '[:find ?age
 ;        :where [?e :user/name "Akash"]
@@ -100,7 +100,7 @@
 ; (query (get-conn) #{:title :content :url :tags} {:id 43})
 
 (def sample-post {:url "http://wwwasas.google.com"
-                  :content "A asa content"
+                  :content "A asa content \n go again"
                   :title "aas "
                   :tags ["abc"]})
 
@@ -114,14 +114,21 @@
              (aws/upload name {:content file-content})
              name)))))
 
+(defn process-post [{:keys [url content title tags css] :as post}]
+  {:url url
+   :content (clojure.core/str "<div>"
+                              (str/replace content #"\n" "</div><div>")
+                              "</div>")
+   :title title
+   :tags tags
+   :css (process-css css)})
 
 (defn add-post [store {:keys [css] :as post}]
-  (transact-data store ::post (merge (select-keys post [:url :content :title :tags :css])
-                                     {:css (process-css css)})))
+  (println "Adding post " post)
+  (transact-data store ::post (process-post post)))
 
 (defn update-post [store {:keys [url content title tags css] :as post} id]
-  (update-data store ::post (merge post
-                                   {:css (process-css css)}) id))
+  (update-data store ::post (process-post post) id))
 ;
 ; (h/q  '[:find ?e (pull ?e [*])
 ;         :where [?e :content
@@ -130,15 +137,15 @@
 ;                        [?e :tags ?tags]]]
 ;       @(get-conn))
 ; (h/pull @(get-conn) '[:_tags-sm] 10)
-; (def post (add-post (get-conn) sample-post))
-; (get-post (get-conn) (:id post))
+(def post (add-post (get-conn) sample-post))
+; (get-post (get-conn) {:id (:id post)})
 ; (get-post  (get-conn) {:id nil})
 
 ; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
 ; (<!! (k/get-in (get-conn) [::abc "def"]))
 ; (<!! (k/get-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"]))
 ; (<!! (k/update-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"] {:name "a"}))
-; (def get-stuff (get-post (get-conn) 2))
+; (def get-stuff (get-post (get-conn) 2)) 
 ; (update-post (get-conn) (assoc get-stuff :tags ["def" "jkl" "a"]) 2)
 ; CRU testing
 ; @(h/transact (get-conn) [{:tags-sm ["abc" "de" "no"] :db/id 11}])
@@ -199,8 +206,8 @@
 
 
 (defn handle-add-post [conn post]
-  (send-response (response/ok {:msg "Post added"
-                               :id (:id (add-post conn post))})))
+  (send-response (response/ok (merge {:msg "Post added"}
+                                     (add-post conn post)))))
 
 (defn handle-update-post [conn {:keys [:id] :as post}]
   (update-post conn post id)
