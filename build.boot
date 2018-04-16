@@ -21,6 +21,7 @@
                             [ring-middleware-format "0.7.2"]
                             [adzerk/boot-reload "0.5.2" :scope "test"]
                             [adzerk/boot-test "1.2.0" :scope "test"]
+                            [com.joshuadavey/boot-shadow-cljs "0.0.1"]
                             [reagent "0.8.0-alpha2"]
                             [reagi "0.10.1"]
                             [io.replikativ/konserve "0.5-beta1"]
@@ -50,9 +51,10 @@
 (require '[system.boot :refer [system run]]
          '[voidwalker.systems :refer [dev-system]]
          '[clojure.edn :as edn]
+         '[snow.env :refer [profile]]
          '[environ.core :refer [env]]
          '[environ.boot :refer [environ]]
-         '[snow.boot :refer [profile migrate rollback]])
+         '[snow.boot :refer [migrate rollback]])
 
 (require '[adzerk.boot-cljs :refer :all]
          '[adzerk.boot-cljs-repl :refer :all]
@@ -64,6 +66,9 @@
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
 
 (require '[adzerk.bootlaces :refer :all])
+
+(require '[com.joshuadavey.boot-shadow-cljs :as shadow])
+
 (bootlaces! version :dont-modify-paths? true)
 
 (task-options!
@@ -92,7 +97,7 @@
   "run a restartable system"
   []
   (comp
-   (environ :env (snow.boot/profile))
+   (environ :env (profile))
    (watch :verbose true)
    (system :sys #'dev-system
            :auto true
@@ -111,15 +116,15 @@
 (deftask build
   "Build the project locally as a JAR."
   []
-  (comp (cljs :source-map true
-              :optimizations :none)
-     (aot :namespace #{'voidwalker.core})
-     (uber)
-     (jar :main 'voidwalker.core
-          :file "voidwalker.jar")
-     (sift :include #{#".*\.jar"})
-     (target)
-     (notify)))
+  (comp
+   (shadow/release :build "app")
+   (aot :namespace #{'voidwalker.core})
+   (uber)
+   (jar :main 'voidwalker.core
+        :file "voidwalker.jar")
+   (sift :include #{#".*\.jar"})
+   (target)
+   (notify)))
 ;
 ; (cljs :source-map true
 ;               :optimizations :none)

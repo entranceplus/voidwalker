@@ -1,12 +1,12 @@
 (ns voidwalker.core
   (:gen-class)
-  (:require [system.repl :refer [set-init! start]]
-            [voidwalker.systems :as system]))
-
+  (:require [snow.repl :as repl]
+            [snow.env :refer [read-edn]]
+            [voidwalker.systems :as void-system]))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Starting voidwalker")
-  (set-init! #'system/prod-system)
-  (start))
+  (println "Starting voidwalker " args)
+  (repl/start-systems {:snow.systems/system-fn void-system/system-config
+                       :snow.systems/config (read-edn "profiles.edn")}))

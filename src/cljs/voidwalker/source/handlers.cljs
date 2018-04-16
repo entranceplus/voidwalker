@@ -76,6 +76,15 @@
  (fn [db _]
    (assoc db :new/post-status :success)))
 
+
+(reg-event-db
+ :update-article
+ (fn [db [_ article]]
+   (println "called  update-article handle" db)
+   (assoc db :articles (map (fn [a]
+                              (if (= (:id a) (:id article)) article a))
+                            (:articles db)))))
+
 (reg-event-db
  :post-status-init
  (fn [db _]

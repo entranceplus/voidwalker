@@ -20,7 +20,7 @@
 ;
 ; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
 ;
-(defn get-conn [] (-> system.repl/system :conn :store))
+; (defn get-conn [] (-> system.repl/system :conn :store))
 ;
 ; (h/q '[:find ?age
 ;        :where [?e :user/name "Akash"]
@@ -116,9 +116,10 @@
 
 (defn process-post [{:keys [url content title tags css] :as post}]
   {:url url
-   :content (clojure.core/str "<div>"
-                              (str/replace content #"\n" "</div><div>")
-                              "</div>")
+   ;; :content (clojure.core/str "<div>"
+   ;;                            (str/replace content #"\n" "</div><div>")
+   ;;                            "</div>")
+   :content content
    :title title
    :tags tags
    :css (process-css css)})
@@ -137,7 +138,7 @@
 ;                        [?e :tags ?tags]]]
 ;       @(get-conn))
 ; (h/pull @(get-conn) '[:_tags-sm] 10)
-(def post (add-post (get-conn) sample-post))
+; (def post (add-post (get-conn) sample-post))
 ; (get-post (get-conn) {:id (:id post)})
 ; (get-post  (get-conn) {:id nil})
 

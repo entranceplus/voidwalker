@@ -13,6 +13,7 @@
             [clojure.string :as str]
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
+            [hickory.core :as h]
             [voidwalker.source.routes :refer [nav-link]])
   (:require ["@tinymce/tinymce-react" :refer (Editor)])
   (:import goog.History))
@@ -80,7 +81,8 @@
   "This is a transducer which will read data from the wb atom and
    write data to content atom"
   (map (fn [{data :file-content}]
-         (reset! content (append-data @wb data)))))
+         (swap! wb append-data data)
+         (reset! content @wb))))
 
 (defn get-files [e]
   (array-seq (.. e -target -files)))
@@ -190,9 +192,11 @@
         [:div.column {:key name} [file-view name del-ch]])]]))
 
 
+(def new-article (r/atom {}))
+
 (defn add-post-form [& {{:keys [url tags content title id css]} :data}]
   (r/with-let [url (r/atom url)
-               tags (r/atom tags)
+               tags (r/atom (str/join "," tags))
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
@@ -213,15 +217,15 @@
       [css-container css-files]
       [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
-                    (.preventDefault e)
-                    (println "cs " @css-files)
-                    (rf/dispatch [:save-article
-                                  {:url @url
-                                   :id id
-                                   :tags (str/split @tags #",")
-                                   :css @css-files
-                                   :content @wb
-                                   :title @title}]))}
+                    (let [article  {:url @url
+                                    :id id
+                                    :tags (str/split @tags #",")
+                                    :css @css-files
+                                    :content @wb
+                                    :title @title}]
+                      (.preventDefault e)
+                      (when (some? id) (rf/dispatch [:update-article article]))
+                      (rf/dispatch [:save-article article])))}
        "Save article"]
       [progress-info @post-status]]]))
 
@@ -229,6 +233,15 @@
   ([] (add-post-form))
   ([id] (r/with-let [article-data @(rf/subscribe [:article id])]
           (add-post-form :data article-data))))
+
+; (:content @new-article)
+
+;; (def articles @(rf/subscribe [:articles]))
+
+;; (def t (->> articles
+;;             (filter #(= (:id %) "f7f977dd-20dd-4193-aea5-826682c8a9c4"))
+;;             first
+;;             :tags))
 
 ;;;;;;;;;;;;;;;
 ;; home-page ;;
