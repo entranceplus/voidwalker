@@ -21,7 +21,7 @@
                             [ring-middleware-format "0.7.2"]
                             [adzerk/boot-reload "0.5.2" :scope "test"]
                             [adzerk/boot-test "1.2.0" :scope "test"]
-                            [com.joshuadavey/boot-shadow-cljs "0.0.1"]
+                            [entranceplus/boot-shadow-cljs "0.0.1"]
                             [reagent "0.8.0-alpha2"]
                             [reagi "0.10.1"]
                             [io.replikativ/konserve "0.5-beta1"]
@@ -42,7 +42,7 @@
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
                             [snow "0.1.0-SNAPSHOT"]
-                            [adzerk/bootlaces "0.1.13"]
+                            [entranceplus/bootlaces "0.1.14"]
                             [amazonica "0.3.121"]
                             [figwheel-sidecar "0.5.7" :scope "test"]
                             [ajchemist/boot-figwheel "0.5.4-6"]
@@ -133,6 +133,7 @@
 
 (deftask publish []
   (comp
+   (shadow/release :build "app")
    (build-jar)
    (push-snapshot)))
 
@@ -140,9 +141,10 @@
   "Install jar locally"
   []
   (comp
-     (pom)
-     (jar)
-     (install)))
+   (pom)
+   (shadow/release :build "app")
+   (jar)
+   (install)))
 
 (deftask run-project
   "Run the project."

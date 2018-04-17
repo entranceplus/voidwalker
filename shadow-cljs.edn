@@ -20,6 +20,7 @@
  :builds {:app {:target :browser
                 :output-dir "resources/public/js/out"
                 :asset-path "/js/out"
+                :compiler-options {:optimizations :simple}
                 :modules
                 {:app
                   {:entries [voidwalker.source.app]}}}}}
