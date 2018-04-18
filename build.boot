@@ -5,6 +5,8 @@
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]
+                            [hickory "0.7.1"]
+                            [hiccup "1.0.5"]
                             [org.clojure/clojurescript "1.10.238"]
                             [org.immutant/immutant "2.1.9"]
                             [org.danielsz/system "0.4.2-SNAPSHOT"]
@@ -39,6 +41,8 @@
                             [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
                             [adzerk/boot-test "1.2.0" :scope "test"]
                             [adzerk/boot-reload "0.5.2" :scope "test"]
+                            [powerlaces/boot-figreload "LATEST" :scope "test"]
+                            [pandeiro/boot-http "0.7.6" :scope "test"]
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
                             [snow "0.1.0-SNAPSHOT"]
@@ -57,13 +61,10 @@
          '[snow.boot :refer [migrate rollback]])
 
 (require '[adzerk.boot-cljs :refer :all]
-         '[adzerk.boot-cljs-repl :refer :all]
-         '[adzerk.boot-reload :refer :all])
+         '[adzerk.boot-cljs-repl :refer :all])
 
-(require '[nightlight.boot :refer [nightlight]])
-
-(require 'boot-figwheel)
-(refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
+(require '[powerlaces.boot-figreload :refer [reload]]
+         '[pandeiro.boot-http        :refer [serve]])
 
 (require '[adzerk.bootlaces :refer :all])
 
@@ -79,19 +80,20 @@
       :scm         {:url "https://github.com/entranceplus/voidwalker"}
       :license     {"Eclipse Public License"
                     "http://www.eclipse.org/legal/epl-v10.html"}}
- figwheel
- {:build-ids  ["dev"]
-  :all-builds [{:id "dev"
-                :source-paths ["src"]   ; cljs(cljc) directories
-                :compiler {:main 'voidwalker.source.app
-                           :output-to "resources/public/js/app.js"}
-                :figwheel {:build-id  "dev"
-                           :on-jsload 'voidwalker.source.app/main!
-                           :heads-up-display true
-                           :autoload true
-                           :debug false}}]
-  :figwheel-options {:open-file-command "emacsclient"
-                     :repl true}})
+ ;; figwheel
+ ;; {:build-ids  ["dev"]
+ ;;  :all-builds [{:id "dev"
+ ;;                :source-paths ["src"]   ; cljs(cljc) directories
+ ;;                :compiler {:main 'voidwalker.source.app
+ ;;                           :output-to "resources/public/js/app.js"}
+ ;;                :figwheel {:build-id  "dev"
+ ;;                           :on-jsload 'voidwalker.source.app/main!
+ ;;                           :heads-up-display true
+ ;;                           :autoload true
+ ;;                           :debug false}}]
+ ;;  :figwheel-options {:open-file-command "emacsclient"
+ ;;                     :repl true}}
+ )
 
 (deftask dev
   "run a restartable system"
@@ -102,15 +104,13 @@
    (system :sys #'dev-system
            :auto true
            :files ["routes.clj" "systems.clj" "content.clj"])
-   (reload :asset-path "public")
-   ; (figwheel)
    (repl :server true
          :port 8001
          :bind "0.0.0.0")
-   (nightlight :port 5000)
-   ; (cljs-repl)
-   ; (cljs :source-map true
-   ;       :optimizations :none)
+   ;; (reload)
+   ;; (cljs-repl)
+   ;; (cljs :source-map true
+   ;;       :optimizations :none)
    (notify)))
 
 (deftask build

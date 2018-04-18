@@ -65,24 +65,49 @@
     (reduce (fn [acc e]
               (str acc o-tag e c-tag)) "" coll)))
 
+(defn csv-data->maps [csv-data]
+  (map zipmap
+       (->> (first csv-data) ;; First row is the header
+            ;;(map keyword) ;; Drop if you want string keys instead
+            repeat)
+       (rest csv-data)))
 
-(defn table-from-csv [csv-data]
-  (let [csv (read-csv csv-data :newline :cr+lf)]
-    (add-tag :table [(add-tag :tr [(add-tag :th (first csv))])
-                     (add-tag :tr (map (fn [row]
-                                         (add-tag :td row)) (rest csv)))])))
+(defn process-row [row]
+  (->>  row
+        (map (fn [[key value]]
+               {(-> key str/trim str/lower-case keyword) {:h key
+                                                 :c value}}))
+        (into {})))
 
-(defn append-data [current-data file-content]
-  (reset! fcon (table-from-csv file-content))
-  (str current-data "<br />" (table-from-csv file-content)))
 
-(defn update-content
-  [content wb]
+(defn gen-datasource-map [csv]
+  (->> (csv-data->maps csv)
+       (map process-row)))
+
+;; (csv-data->maps (read-csv @data))
+
+;; (defn table-from-csv [initial-html csv-data]
+;;   (let [csv ]
+;; ;    (reset! data csv)
+;;     {:view (str initial-html
+;;                 ;; (add-tag :table [(add-tag :tr [(add-tag :th (first csv))])
+;;                 ;;                  (add-tag :tr (map (fn [row]
+;;                 ;;                                      (add-tag :td row)) (rest csv)))])
+;;                 )
+;;      :data (gen-datasource-map csv)}))
+
+;; (defn gen-datasource [file-content]
+;; ;;  (reset! fcon (table-from-csv file-content))
+;;   (table-from-csv  file-content))
+
+(defn add-datasource
+  [datasource]
   "This is a transducer which will read data from the wb atom and
    write data to content atom"
-  (map (fn [{data :file-content}]
-         (swap! wb append-data data)
-         (reset! content @wb))))
+  (map (fn [{:keys [file-content name]}]
+         (let [csv (read-csv file-content :newline :cr+lf)]
+           (reset! datasource {:data (doall (gen-datasource-map csv))
+                               :name name})))))
 
 (defn get-files [e]
   (array-seq (.. e -target -files)))
@@ -165,7 +190,10 @@
 ;     <i class="fas fa-ban fa-stack-2x has-text-danger"></i>
 ;   </span>
 ; </span>
-(defn file-view [name ch]
+(defn file-view
+  "ch is the channel on which name will be sent when the
+  delete button is clicked"
+  [name ch]
   [:div
    [:div>span.icon.is-large
     [:i.fab.fa-css3-alt.fa-3x]]
@@ -194,13 +222,18 @@
 
 (def new-article (r/atom {}))
 
-(defn add-post-form [& {{:keys [url tags content title id css]} :data}]
+(defn datasource-view [{:keys [name] :as source}]
+  (println "Source is " source)
+  (when (some? source)  [file-view (str "Datasource: " name) nil]) )
+
+(defn add-post-form [& {{:keys [url tags content title id css datasource]} :data}]
   (r/with-let [url (r/atom url)
                tags (r/atom (str/join "," tags))
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
-               file-chan (chan 10 (update-content content wb))
+               datasource (r/atom datasource)
+               file-chan (chan 10 (add-datasource datasource))
                css-files (r/atom (map (fn [url] {:name url}) css))
                post-status (rf/subscribe [:new/post-status])]
     [:div.section>div.container
@@ -213,7 +246,9 @@
       [input {:placeholder "Enter title"
               :state title}]
       [:div.field [(editor content wb)]]
-      [file-input {:placeholder "Add a datasource"} file-chan]
+      [:div.columns
+       [:div.column [file-input {:placeholder "Add a datasource"} file-chan]]
+       [:div.column [datasource-view @datasource]]]
       [css-container css-files]
       [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
@@ -222,6 +257,7 @@
                                     :tags (str/split @tags #",")
                                     :css @css-files
                                     :content @wb
+                                    :datasource @datasource
                                     :title @title}]
                       (.preventDefault e)
                       (when (some? id) (rf/dispatch [:update-article article]))
