@@ -133,7 +133,7 @@
 
 (deftask publish []
   (comp
-   (shadow/release :build "app")
+   ;; (shadow/release :build "app")
    (build-jar)
    (push-snapshot)))
 

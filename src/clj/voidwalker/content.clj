@@ -1,6 +1,6 @@
 (ns voidwalker.content
   (:require [clojure.string :as str]
-            [compojure.core :refer [context defroutes GET POST routes]]
+            [compojure.core :refer [context defroutes GET POST routes DELETE]]
             [ring.util.http-response :as response]
             [hiccup.core :as hi]
             [snow.db :as dbutil]
@@ -21,7 +21,7 @@
 ;
 ; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
 ;
-;(defn get-conn [] (-> system.repl/system :conn :store))
+(defn get-conn [] (-> system.repl/system :conn :store))
 ;
 ; (h/q '[:find ?age
 ;        :where [?e :user/name "Akash"]
@@ -49,6 +49,17 @@
   (let [id (dbutil/uuid)]
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
+
+(defn delete-data [conn ref]
+  (<!! (k/update-in conn (butlast ref) (fn [coll]
+                                         (dissoc coll (last ref))))))
+
+;; (<!! (k/assoc-in (get-conn) [:ok :id] "hello"))
+;; (<!! (k/get-in (get-conn) [:ok :id]))
+;; (<!! (k/get-in (get-conn) [::post id]))
+;; (<!! (k/update-in (get-conn) [:ok] (fn [coll]
+;;                                      (println "Coll is " coll)
+;;                                      (dissoc coll :id))))
 
 ; (transact-data (get-conn) ::new {:ac "def"})
 
@@ -125,7 +136,7 @@
    ;; :content content
    :title title
    :tags tags
-   :datasource [datasource]
+   :datasource (u/make-vec-if-not datasource)
    :css (process-css css)})
 
 (defn add-post [store {:keys [css] :as post}]
@@ -152,7 +163,13 @@
 ; (<!! (k/get-in (get-conn) [::abc "def"]))
 ; (<!! (k/get-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"]))
 ; (<!! (k/update-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"] {:name "a"}))
-; (def get-stuff (get-post (get-conn) 2)) 
+;; (def get-stuff (get-post (get-conn) {:id "26df8057-9501-466f-81f6-3249a2936240"}))
+
+;; (def id  "26df8057-9501-466f-81f6-3249a2936240")
+
+
+
+;; (delete-data (get-conn) [::post id])
 ; (update-post (get-conn) (assoc get-stuff :tags ["def" "jkl" "a"]) 2)
 ; CRU testing
 ; @(h/transact (get-conn) [{:tags-sm ["abc" "de" "no"] :db/id 11}])
@@ -293,5 +310,8 @@
                   (if (some? id)
                     (handle-update-post conn post)
                     (handle-add-post conn post)))
+            (DELETE "/:id" [id]
+                    (delete-data conn [::post id])
+                    (send-response (response/ok {:msg "deleted"})))
             (POST "/file" {:keys [body]}
                   (send-response (response/ok (slurp body)))))))

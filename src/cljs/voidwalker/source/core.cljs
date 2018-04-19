@@ -102,8 +102,6 @@
 
 (defn add-datasource
   [datasource]
-  "This is a transducer which will read data from the wb atom and
-   write data to content atom"
   (map (fn [{:keys [file-content name]}]
          (let [csv (read-csv file-content :newline :cr+lf)]
            (reset! datasource {:data (doall (gen-datasource-map csv))
@@ -283,14 +281,25 @@
 ;; home-page ;;
 ;;;;;;;;;;;;;;;
 
+(def delete-post (map (fn [id]
+                        (println "Dispatching delete-post")
+                        (rf/dispatch [:delete-article id]))))
+
+(defn article-view
+  [id title ch]
+  [:div.box {:key id}
+   [:ul
+    [nav-link {:route :voidwalker.edit
+               :params {:id id}
+               :text title}]
+    [:span.icon.is-medium.is-pulled-right  {:on-click #(go (>! ch id))}
+     [:i.fas.fa-trash-alt]]]])
+
 (defn home-page []
-  (fn []
+  (r/with-let [post-ch (chan 10 delete-post)]
     [:section.section>div.container
      [:h1.title "List of Posts"]
      (map (fn [{:keys [title id]}]
             (println "keys are " title id)
-            [:ul {:key id}
-             [nav-link {:route :voidwalker.edit
-                        :params {:id id}
-                        :text title}]])
+            (article-view id title post-ch))
           @(rf/subscribe [:articles]))]))

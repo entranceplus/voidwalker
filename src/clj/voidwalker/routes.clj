@@ -3,6 +3,7 @@
             [ring.util.http-response :as response]
             [clojure.java.io :as io]))
 
+
 (defn ok-response [response]
   (-> (response/ok response)
       (response/header "Content-Type" "text/plain")))

@@ -71,6 +71,15 @@
                               :on-failure [:error-post]})
     :db (assoc db :new/post-status :loading)}))
 
+(reg-event-fx
+ :delete-article
+ (fn [{:keys [db]} [_ id]]
+   {:http-xhrio (new-request {:method :delete
+                              :uri (str "/articles/" id)
+                              :on-success [:get-articles]
+                              :on-failure [:error-post]})
+    :db db}))
+
 (reg-event-db
  :article-saved
  (fn [db _]
