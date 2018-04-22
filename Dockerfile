@@ -1,13 +1,21 @@
-FROM clojure:lein
+FROM clojure:boot
 MAINTAINER Akash Shakdwipeea <ashakdwipeea@gmail.com>
 
-RUN mkdir /usr/src/voidwalker
-WORKDIR /usr/src/voidwalker
+RUN mkdir /voidwalker
+WORKDIR /voidwalker
 
-# prod
-COPY target/uberjar/voidwalker.jar .
-CMD ["java", "-jar", "voidwalker.jar"]
 
-# dev
-# COPY . /usr/src/voidwalker
-# CMD ["lein", "repl", ":headless", ":host", "0.0.0.0", ":port", "7888"]
+COPY . /voidwalker/
+
+RUN apt-get install -y curl \
+  && curl -sL https://deb.nodesource.com/setup_9.x | bash - \
+  && apt-get install -y nodejs \
+  && curl -L https://www.npmjs.com/install.sh | sh
+
+RUN apt-get install -y curl && curl -sL https://deb.nodesource.com/setup_9.x | bash  && apt-get install -y nodejs && curl -L https://www.npmjs.com/install.sh | sh
+
+RUN npm i -g shadow-cljs
+
+RUN boot publish
+
+CMD ["cat"]
