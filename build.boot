@@ -101,6 +101,7 @@
   (comp
    (environ :env (profile))
    (watch :verbose true)
+   (shadow/release :build "app")
    (system :sys #'dev-system
            :auto true
            :files ["routes.clj" "systems.clj" "content.clj"])
@@ -118,9 +119,8 @@
   []
   (comp
    (shadow/release :build "app")
-   (aot :namespace #{'voidwalker.core})
    (uber)
-   (jar :main 'voidwalker.core
+   (jar :main 'clojure.main
         :file "voidwalker.jar")
    (sift :include #{#".*\.jar"})
    (target)

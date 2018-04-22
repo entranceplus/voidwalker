@@ -18,8 +18,8 @@
                 [refactor-nrepl "2.4.0-SNAPSHOT"]]
 
  :builds {:app {:target :browser
-                :output-dir "resources/public/js/out"
-                :asset-path "/js/out"
+                :output-dir "public/js"
+                :asset-path "/js"
                 :compiler-options {:optimizations :simple}
                 :modules
                 {:app
