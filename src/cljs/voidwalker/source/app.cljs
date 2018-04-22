@@ -2,6 +2,7 @@
   (:require [reagent.core :as r]
             [bide.core :as b]
             [voidwalker.source.core :as v]
+            [voidwalker.source.template :as t]
             [voidwalker.source.routes :refer [router]]
             [re-frame.core :as rf]))
 
@@ -13,7 +14,8 @@
    (case name
      :voidwalker.home [v/home-page]
      :voidwalker.add [v/add-post]
-     :voidwalker.edit [v/add-post (:id params)])])
+     :voidwalker.edit [v/add-post (:id params)]
+     :voidwalker.template [t/template-view])])
 
 (defn on-navigate
   "A function which will be called on each route change."

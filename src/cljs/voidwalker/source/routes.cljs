@@ -11,7 +11,8 @@
 
 (def route-map {:voidwalker.home "/home"
                 :voidwalker.add "/add"
-                :voidwalker.edit "/edit/:id"})
+                :voidwalker.edit "/edit/:id"
+                :voidwalker.template "/template"})
 
 (def router (make-bide-router route-map))
 

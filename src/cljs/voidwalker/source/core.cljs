@@ -37,9 +37,12 @@
    ; [:div {:class (when (= @(rf/subscribe [:page]) :add
    ;                             "is-active"))}
    [:div.navbar-menu>div.navbar-start
-     [nav-link {:route :voidwalker.add
-                :text "Add"
-                :nav? true}]]])
+    [nav-link {:route :voidwalker.add
+               :text "Add"
+               :nav? true}]
+    [nav-link {:route :voidwalker.template
+               :text "Templates"
+               :nav? true}]]])
 
 (def fcon (r/atom {:id 1}))
 

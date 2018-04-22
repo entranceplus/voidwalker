@@ -3,7 +3,6 @@
             [compojure.core :refer [context defroutes GET POST routes DELETE]]
             [ring.util.http-response :as response]
             [hiccup.core :as hi]
-            [snow.db :as dbutil]
             [snow.util :as u]
             [voidwalker.aws :as aws]
             [environ.core :refer [env]]
@@ -21,7 +20,7 @@
 ;
 ; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
 ;
-(defn get-conn [] (-> system.repl/system :conn :store))
+;(defn get-conn [] (-> system.repl/system :conn :store))
 ;
 ; (h/q '[:find ?age
 ;        :where [?e :user/name "Akash"]
@@ -46,7 +45,7 @@
   [conn spec data]
   ; {:pre [(s/valid? spec data)]}
   (println "data to be inserted  is " data)
-  (let [id (dbutil/uuid)]
+  (let [id (u/uuid)]
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
 

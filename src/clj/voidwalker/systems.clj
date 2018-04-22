@@ -15,6 +15,7 @@
             (system.components
              [postgres :refer [new-postgres-database]]
              [immutant-web :refer [new-immutant-web]]
+             [jetty :refer [new-web-server]]
              [repl-server :refer [new-repl-server]]
              [endpoint :refer [new-endpoint]]
              [middleware :refer [new-middleware]]
@@ -42,7 +43,7 @@
                     {:middleware  [rest-middleware
                                    [wrap-defaults api-defaults]]})
    :handler (component/using (new-handler) [:api-endpoint :site-endpoint])
-   :api-server (component/using (new-immutant-web :port (system/get-port config))
+   :api-server (component/using (new-web-server (system/get-port config))
                                 [:handler])])
 
 (defn dev-system []
