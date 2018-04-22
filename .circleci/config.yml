@@ -8,7 +8,7 @@ jobs:
     working_directory: /voidwalker
     docker:
       # specify the version you desire here
-      - image: clojure:boot
+      - image: shakdwipeea/clj-node-build
     environment:
       JVM_OPTS: -Xmx3200m
       # Specify service dependencies here if necessary
@@ -20,8 +20,8 @@ jobs:
       - checkout
       - restore_cache:
           key: voidwalker-{{checksum "build.boot"}}
-      - run: apt-get install -y curl && curl -sL https://deb.nodesource.com/setup_9.x | bash  && apt-get install -y nodejs && curl -L https://www.npmjs.com/install.sh | sh
       - run: npm i -g shadow-cljs
+      - run: npm i
       - run: boot deps
       - save_cache:
           paths:
