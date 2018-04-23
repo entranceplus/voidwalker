@@ -22,9 +22,8 @@ jobs:
           key: voidwalker-{{checksum "build.boot"}}
       - run: npm i -g shadow-cljs
       - run: npm i
-      - run: boot deps
+      - run: boot build
       - save_cache:
           paths:
             - /root/.m2
           key: voidwalker-{{checksum "build.boot"}}
-      - run: boot publish
