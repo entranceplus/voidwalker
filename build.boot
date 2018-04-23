@@ -2,7 +2,7 @@
 (def version "0.1.2")
 
 (set-env! :resource-paths #{"resources" "src/clj" "src/cljs"}
-          :checkouts '[[snow "0.1.0-SNAPSHOT"]]
+          :checkouts '[[snow "0.1.1"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]
                             [hickory "0.7.1"]
@@ -45,7 +45,7 @@
                             [pandeiro/boot-http "0.7.6" :scope "test"]
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
-                            [snow "0.1.0-SNAPSHOT"]
+                            [snow "0.1.1"]
                             [entranceplus/bootlaces "0.1.14"]
                             [amazonica "0.3.121"]
                             [figwheel-sidecar "0.5.7" :scope "test"]
@@ -135,7 +135,7 @@
   (comp
    (shadow/release :build "app")
    (build-jar)
-   (push-snapshot)))
+   (push-release)))
 
 (deftask install-local
   "Install jar locally"
