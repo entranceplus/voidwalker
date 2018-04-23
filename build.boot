@@ -1,5 +1,5 @@
 (def project 'voidwalker)
-(def version "0.1.0-SNAPSHOT")
+(def version "0.1.2")
 
 (set-env! :resource-paths #{"resources" "src/clj" "src/cljs"}
           :checkouts '[[snow "0.1.0-SNAPSHOT"]]
