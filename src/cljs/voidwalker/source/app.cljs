@@ -4,6 +4,7 @@
             [voidwalker.source.core :as v]
             [voidwalker.source.template :as t]
             [voidwalker.source.routes :refer [router]]
+            [snow.comm.core]
             [re-frame.core :as rf]))
 
 (enable-console-print!)
@@ -26,10 +27,14 @@
   (r/render [page name params]
             (js/document.getElementById "app")))
 
-(defn main! []
+(defn main []
   (println "At least main! called")
+  (rf/dispatch-sync [:initialize-db])
   (rf/clear-subscription-cache!)
   (b/start! router {:default :voidwalker.home
                     :html5? true
                     :on-navigate on-navigate}))
-(main!)
+
+
+(main)
+

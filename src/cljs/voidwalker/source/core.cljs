@@ -13,6 +13,7 @@
             [clojure.string :as str]
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
+            [snow.files.ui :as file]
             [hickory.core :as h]
             [voidwalker.source.routes :refer [nav-link]])
   (:require ["@tinymce/tinymce-react" :refer (Editor)])
@@ -52,6 +53,7 @@
 (def ^:private newline-error-message
   (str ":newline must be one of [" (str/join "," (keys newlines)) "]"))
 
+
 (defn read-csv
   "Reads data from String in CSV-format."
   [data & options]
@@ -79,7 +81,7 @@
   (->>  row
         (map (fn [[key value]]
                {(-> key str/trim str/lower-case keyword) {:h key
-                                                 :c value}}))
+                                                          :c value}}))
         (into {})))
 
 
@@ -162,7 +164,7 @@
    cursor to jump to start"
   (fn []
      [(r/adapt-react-class Editor)
-      {:value @content
+      {:value @wb-atom
        :init  {"plugins" "link image table"
                "height" 200}
        :on-change (fn [e]
@@ -223,9 +225,14 @@
 
 (def new-article (r/atom {}))
 
-(defn datasource-view [{:keys [name] :as source}]
-  (println "Source is " source)
-  (when (some? source)  [file-view (str "Datasource: " name) nil]) )
+(defn datasource-view [ds]
+  [:div
+   (println "source " (-> ds first :name))
+   (for [{name :name} ds]
+     [file/file-view {:name (str "Datasource: " name)
+                      :key :datasource}])])
+
+
 
 (defn add-post-form [& {{:keys [url tags content title id css datasource]} :data}]
   (r/with-let [url (r/atom url)
@@ -233,7 +240,7 @@
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
-               datasource (r/atom datasource)
+               datasource (r/atom  datasource)
                file-chan (chan 10 (add-datasource datasource))
                css-files (r/atom (map (fn [url] {:name url}) css))
                post-status (rf/subscribe [:new/post-status])]
@@ -247,10 +254,14 @@
       [input {:placeholder "Enter title"
               :state title}]
       [:div.field [(editor content wb)]]
-      [:div.columns
-       [:div.column [file-input {:placeholder "Add a datasource"} file-chan]]
-       [:div.column [datasource-view @datasource]]]
-      [css-container css-files]
+      ;; [:div.columns
+      ;;  [:div.column [file-input {:placeholder "Add a datasource"} file-chan]]
+      ;;  [:div.column [datasource-view @datasource]]]
+      ;; [css-container css-files]
+      [file/view {:id :datasource
+                  :placeholder "Add a datasource"}]
+      [file/view {:id :css
+                  :placeholder "Upload css"}]
       [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
                     (let [article  {:url @url

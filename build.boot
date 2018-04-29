@@ -1,8 +1,8 @@
 (def project 'voidwalker)
-(def version "0.1.3")
+(def version "0.1.4")
 
 (set-env! :resource-paths #{"resources" "src/clj" "src/cljs"}
-          :checkouts '[[snow "0.1.1"]]
+          :checkouts '[[snow "0.2.1"]]
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [org.clojure/core.async "0.4.474"]
                             [hickory "0.7.1"]
@@ -45,7 +45,7 @@
                             [pandeiro/boot-http "0.7.6" :scope "test"]
                             [com.cemerick/piggieback "0.2.1" :scope "test"]
                             [binaryage/devtools "0.9.4" :scope "test"]
-                            [snow "0.1.1"]
+                            [snow "0.2.1"]
                             [entranceplus/bootlaces "0.1.14"]
                             [amazonica "0.3.121"]
                             [figwheel-sidecar "0.5.7" :scope "test"]
@@ -69,6 +69,9 @@
 (require '[adzerk.bootlaces :refer :all])
 
 (require '[com.joshuadavey.boot-shadow-cljs :as shadow])
+
+(require '[nightlight.boot :refer [nightlight]])
+
 
 (bootlaces! version :dont-modify-paths? true)
 
@@ -101,13 +104,13 @@
   (comp
    (environ :env (profile))
    (watch :verbose true)
-   (shadow/release :build "app")
    (system :sys #'dev-system
            :auto true
            :files ["routes.clj" "systems.clj" "content.clj"])
    (repl :server true
          :port 8001
          :bind "0.0.0.0")
+   (nightlight :port 4000)
    ;; (reload)
    ;; (cljs-repl)
    ;; (cljs :source-map true

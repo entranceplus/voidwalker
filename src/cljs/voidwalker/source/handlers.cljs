@@ -1,6 +1,7 @@
 (ns voidwalker.source.handlers
   (:require [voidwalker.source.db :as db]
             [ajax.core :as ajax]
+            [snow.comm.core :as comm]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
             [day8.re-frame.http-fx]))
 
@@ -64,11 +65,10 @@
  :save-article
  (fn [{:keys [db]} [_ article]]
    (println "article is " article)
-   {:http-xhrio (new-request {:method :post
-                              :uri "/articles"
-                              :params article
-                              :on-success [:article-saved]
-                              :on-failure [:error-post]})
+   {::comm/request {:data {::comm/type :voidwalker.content/add
+                           :voidwalker.content/post article}
+                    :on-success [:voidwalker.content/saved]
+                    :on-failure [:error-post]}
     :db (assoc db :new/post-status :loading)}))
 
 (reg-event-fx
@@ -81,8 +81,9 @@
     :db db}))
 
 (reg-event-db
- :article-saved
- (fn [db _]
+ :voidwalker.content/saved
+ (fn [db [_ id]]
+   (println )
    (assoc db :new/post-status :success)))
 
 

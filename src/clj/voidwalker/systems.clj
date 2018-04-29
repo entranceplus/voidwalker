@@ -9,9 +9,11 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [ring.middleware.content-type :refer [wrap-content-type]]
+            [taoensso.sente.server-adapters.immutant :refer (get-sch-adapter)]
             [snow.db :as db]
             [snow.systems :as system]
-            [voidwalker.content :refer [content-routes]]
+            [voidwalker.content :refer [content-routes request-handler]]
+            [snow.comm.core :as comm]
             (system.components
              [postgres :refer [new-postgres-database]]
              [immutant-web :refer [new-immutant-web]]
@@ -20,16 +22,14 @@
              [endpoint :refer [new-endpoint]]
              [middleware :refer [new-middleware]]
              [handler :refer [new-handler]]
-             [konserve :refer [new-konserve]])))
-
+             [konserve :refer [new-konserve]]
+             [sente :refer [new-channel-socket-server sente-routes]])))
 
 (def rest-middleware
   (fn [handler]
     (wrap-restful-format handler
                          :formats [:json-kw]
                          :response-options {:json-kw {:pretty true}})))
-
-;;(system.repl/system :conn)
 
 
 (defn system-config [config]
@@ -42,13 +42,21 @@
    :api-middleware (new-middleware
                     {:middleware  [rest-middleware
                                    [wrap-defaults api-defaults]]})
-   :handler (component/using (new-handler) [:api-endpoint :site-endpoint])
-   :api-server (component/using (new-web-server (system/get-port config))
+   :sente-endpoint (component/using
+                    (new-endpoint comm/sente-routes)
+                    [:comm :site-middleware])
+   :comm (component/using (comm/new-comm comm/event-msg-handler
+                                         comm/broadcast
+                                         request-handler)
+                          [:conn])
+   :broadcast-enabled?_ (atom true)
+   :handler (component/using (new-handler) [:sente-endpoint :api-endpoint :site-endpoint])
+   :api-server (component/using (new-immutant-web :port (system/get-port config))
                                 [:handler])])
+
 
 (defn dev-system []
     (system/gen-system system-config))
-
 
 (defn prod-system
   "Assembles and returns components for a production deployment"

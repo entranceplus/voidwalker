@@ -4,6 +4,8 @@
             [ring.util.http-response :as response]
             [hiccup.core :as hi]
             [snow.util :as u]
+            [snow.comm.core :as comm]
+            [re-frame.core :as rf]
             [voidwalker.aws :as aws]
             [environ.core :refer [env]]
             [konserve.core :as k]
@@ -97,7 +99,7 @@
 
 
 
-(defn update-post [store {:keys [url content title tags css] :as post} id]
+(defn update-post [store {:keys [url content title tags css id] :as post}]
   (update-data store ::post (process-post post) id))
 
 ; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
@@ -212,6 +214,21 @@
   (map (fn [{:keys [file-content name]}]
          (aws/upload name {:content file-content})) css-files))
 
+(defmulti request-handler #(-> % :data ::comm/type))
+
+(defmethod request-handler
+  ::add
+  [{{:keys [::post]} :data {{conn :store} :conn} :component}]
+  (let [p (if (:id post)
+            (update-post conn post)
+            (add-post conn post))]
+    (rf/dispatch [::saved (-> p :id)])))
+
+(rf/reg-event-fx
+ ::saved
+ (fn [{db :db} [_ id]]
+   {::comm/broadcast {:dispatch [::saved id]}
+    :db db}))
 
 (defn handle-add-post [conn post]
   (send-response (response/ok (merge {:msg "Post added"}
