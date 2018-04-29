@@ -10,22 +10,8 @@
             [clojure.core.async :as async :refer [<!!]]
             [clojure.set :as c.s]
             [clojure.spec.alpha :as s]))
-;             [clojure.java.jdbc :as jdbc]))
-;
-; (def uri "datahike:file:///tmp/dh-data9")
-;
-; (h/create-database uri)
-;
-; (def conn (h/connect uri))
-;
-; @(h/transact conn [{:user/id 1 :user/name "Akash" :user/age 33}])
-;
-;(defn get-conn [] (-> system.repl/system :conn :store))
-;
-; (h/q '[:find ?age
-;        :where [?e :user/name "Akash"]
-;               [?e :user/age ?age]]
-;       @conn)
+
+(defn get-conn [] (-> system.repl/system :conn :store))
 
 (s/def ::url string?)
 (s/def ::content string?)
@@ -54,7 +40,7 @@
                                          (dissoc coll (last ref))))))
 
 ;; (<!! (k/assoc-in (get-conn) [:ok :id] "hello"))
-;; (<!! (k/get-in (get-conn) [:ok :id]))
+; (<!! (k/get-in (get-conn) [::post]))
 ;; (<!! (k/get-in (get-conn) [::post id]))
 ;; (<!! (k/update-in (get-conn) [:ok] (fn [coll]
 ;;                                      (println "Coll is " coll)
@@ -70,26 +56,6 @@
 (defn update-data
   [conn spec data ref]
   (<!! (k/assoc-in conn [spec ref] data)))
-;
-; (defn make-query-set [q w]
-;   (c.s/union q (-> w keys set)))
-;
-; (defn make-where [q w]
-;   (->> w
-;        (make-query-set q)
-;        (map (fn [k]
-;               (cond-> ['?e k]
-;                 (contains? w k) (conj (k w)))))))
-;
-; ; (make-where #{::title} {::name "akash"})
-;
-; (defn make-query
-;   [q w]
-;   `[:find  ~'?e (~'pull ~'?e ~'[*])
-;     :where ~@(make-where q w)])
-;
-; ; (make-query #{::title} {::name "Akash"})
-; ; (make-query #{::title} {})
 
 
 (defn assoc-id
@@ -98,19 +64,6 @@
   [coll]
   (map (fn [[id m]]
           (assoc m :id id)) coll))
-
-; (defn query
-;   ([conn q] (query conn q {}))
-;   ([conn q w]
-;    (if (some? (:id w))
-;      (h/pull @conn '[*] (u/make-int (:id w)))
-;      (-> q
-;          (make-query w)
-;          (h/q @conn)
-;          assoc-id))))
-
-
-; (query (get-conn) #{:title :content :url :tags} {:id 43})
 
 (def sample-post {:url "http://wwwasas.google.com"
                   :content "A asa content \n go again"
@@ -146,17 +99,6 @@
 
 (defn update-post [store {:keys [url content title tags css] :as post} id]
   (update-data store ::post (process-post post) id))
-;
-; (h/q  '[:find ?e (pull ?e [*])
-;         :where [?e :content
-;                        [?e :title]
-;                        [?e :url]
-;                        [?e :tags ?tags]]]
-;       @(get-conn))
-; (h/pull @(get-conn) '[:_tags-sm] 10)
-; (def post (add-post (get-conn) sample-post))
-; (get-post (get-conn) {:id (:id post)})
-; (get-post  (get-conn) {:id nil})
 
 ; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
 ; (<!! (k/get-in (get-conn) [::abc "def"]))
@@ -181,18 +123,7 @@
 ; @(h/transact conn [(merge update-data {:db/id 10})])
 
 
-; (defn get-post
-;   "get posts from database. if id or url is provided, rows are filtered according
-;   to that. where of url overwrites id. support for querying via both id and url is
-;   not provided"
-;   [db & {:keys [id url]}]
-;   (let [query (cond-> {:select [:*]
-;                        :from [:posts]}
-;                 (some? id) (merge {:where [:= :id id]})
-;                 (some? url) (merge {:where [:= :url url]}))]
-;     (cond-> (dbutil/query db query)
-;       (or (some? id)
-                                        ;           (some? url)) first)))
+
 (def find-first (comp first filter))
 
 (defn get-all-posts [store]
@@ -211,6 +142,8 @@
      (get-all-posts store))))
 
 ; (def store (get-conn))
+; (get-all-posts (get-conn))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Starting template ;;
@@ -267,16 +200,6 @@
 ;; (hc/as-hiccup (hc/parse  "<div> </div>"))
 ;; (h/hiccup-to-html (seq (vector (sample-template d))))
 
-; (get-post (get-conn) {:id 43})
-; (get-post (get-conn) nil)
-;; ([db] (dbutil/query (:void-db system.repl/system) {:select [:*]
-;;                                                    :from [:posts]}))
-;; ([db id] (first (dbutil/query db {:select [:*]
-;;                                   :  from [:posts]
-;;                                   :where [:= :id (Integer/parseInt id)]})))
-;; ([db url] (first (dbutil/query db {:select [:*]
-;;                                    :from [:posts]
-;;                                    :where [:= :url url]})))
 
 (defn send-response [response]
   (-> response
@@ -314,3 +237,7 @@
                     (send-response (response/ok {:msg "deleted"})))
             (POST "/file" {:keys [body]}
                   (send-response (response/ok (slurp body)))))))
+
+
+
+
