@@ -11,9 +11,10 @@
             [konserve.core :as k]
             [clojure.core.async :as async :refer [<!!]]
             [clojure.set :as c.s]
+            [snow.repl :as r]
             [clojure.spec.alpha :as s]))
 
-(defn get-conn [] (-> system.repl/system :conn :store))
+(defn get-conn [] (-> (r/system) :conn :store))
 
 (s/def ::url string?)
 (s/def ::content string?)
@@ -41,19 +42,12 @@
   (<!! (k/update-in conn (butlast ref) (fn [coll]
                                          (dissoc coll (last ref))))))
 
-;; (<!! (k/assoc-in (get-conn) [:ok :id] "hello"))
-; (<!! (k/get-in (get-conn) [::post]))
-;; (<!! (k/get-in (get-conn) [::post id]))
-;; (<!! (k/update-in (get-conn) [:ok] (fn [coll]
-;;                                      (println "Coll is " coll)
-;;                                      (dissoc coll :id))))
-
-; (transact-data (get-conn) ::new {:ac "def"})
+;; (delete-data (get-conn) [::post "538cc9ed-7d84-4a41-acc1-1ae48cf97ce2"])
 
 (defn add-data-with-id [conn spec data]
-      (let [id (->> data
-                    (transact-data conn spec))]
-           (merge data {:id id})))
+  (let [id (->> data
+              (transact-data conn spec))]
+    (merge data {:id id})))
 
 (defn update-data
   [conn spec data ref]
@@ -64,8 +58,8 @@
   "the query returns eids as [eid map], this will add
    eid to map"
   [coll]
-  (map (fn [[id m]]
-          (assoc m :id id)) coll))
+  (into {} (map (fn [[id m]]
+                  (array-map id m)) coll)))
 
 (def sample-post {:url "http://wwwasas.google.com"
                   :content "A asa content \n go again"
@@ -90,7 +84,7 @@
    ;; :content content
    :title title
    :tags tags
-   :datasource (u/make-vec-if-not datasource)
+   :datasource datasource
    :css (process-css css)})
 
 (defn add-post [store {:keys [css] :as post}]
@@ -135,7 +129,7 @@
   ([store] (get-post store nil))
   ([store q]
    (if (or (some? (:id q))
-           (some? (:url q)))
+          (some? (:url q)))
      (find-first (fn [{:keys [id url]}]
                    (if (some? (:id q))
                      (= (:id q) id)
@@ -143,8 +137,14 @@
                  (get-all-posts store))
      (get-all-posts store))))
 
-; (def store (get-conn))
-; (get-all-posts (get-conn))
+;; (def store (get-conn))
+;; (->> (get-all-posts (get-conn))
+;;    (filter #(= (:title %) "qwdqwdwqd"))
+;;    first
+;;    :datasource
+;;    first
+;;    vals
+;;    first)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,7 +152,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn data-tmpl  [idx {:keys [name location website mhrd placement mq mode]}]
-  (println "mq is " mq)
   [:div.list-container
    [:div.list-heading
     [:p (+ idx 1)]
@@ -175,22 +174,29 @@
   [:section.exam-list>div.exam-list-container (map-indexed data-tmpl data)])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
-;; Template code ends ;;
+;; Templatecode ends ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn parse-post [{:keys [content] :as post} template]
   (println "Parsing post " (-> post :datasource first :data))
-  (assoc post :content (str content (hi/html (template (-> post :datasource first :data))))))
+  (assoc post :content (str content (hi/html (template (some-> post
+                                                               :datasource
+                                                               first
+                                                               vals
+                                                               first))))))
 
 
 (defn get-templated-post [store]
   (->> (get-all-posts store)
-       (map (fn [post]
-              (if (some? (:datasource post))
-                (parse-post post root-tmpl)
-                post)))))
+     (map (fn [post]
+            (if (some? (:datasource post))
+              (parse-post post root-tmpl)
+              post)))))
 
-; (get-templated-post store)
+
+;; (->> (get-templated-post (get-conn))
+;;    (filter #(= (:title %) "qwdqwdwqd"))
+;;    (map :content))
 
 ;; (def row  (->> (get-all-posts store)
 ;;                (filter #(some? (:datasource %)))
@@ -205,7 +211,7 @@
 
 (defn send-response [response]
   (-> response
-      (response/header "Content-Type" "application/json; charset=utf-8")))
+     (response/header "Content-Type" "application/json; charset=utf-8")))
 
 (defn upload-css
   "takes css-files with file-content and name and returns public url
@@ -214,10 +220,7 @@
   (map (fn [{:keys [file-content name]}]
          (aws/upload name {:content file-content})) css-files))
 
-(defmulti request-handler #(-> % :data ::comm/type))
-
-(defmethod request-handler
-  ::add
+(defn add-post-handler
   [{{:keys [::post]} :data {{conn :store} :conn} :component}]
   (let [p (if (:id post)
             (update-post conn post)

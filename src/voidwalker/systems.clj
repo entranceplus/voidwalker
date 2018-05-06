@@ -9,10 +9,13 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [ring.middleware.content-type :refer [wrap-content-type]]
+            [re-frame.core :as rf]
             [taoensso.sente.server-adapters.immutant :refer (get-sch-adapter)]
             [snow.db :as db]
             [snow.systems :as system]
-            [voidwalker.content :refer [content-routes request-handler]]
+            [voidwalker.content :refer [content-routes] :as content]
+            [voidwalker.dispatch :refer [request-handler]]
+            [voidwalker.template :as t]
             [snow.comm.core :as comm]
             (system.components
              [postgres :refer [new-postgres-database]]
@@ -30,6 +33,17 @@
     (wrap-restful-format handler
                          :formats [:json-kw]
                          :response-options {:json-kw {:pretty true}})))
+
+(rf/reg-event-fx :voidwalker/init
+                 [(rf/inject-cofx :system)]
+                 (fn [{:keys [db system]} _]
+                   (println "ok boyrs got init now will dispatch ")
+                   (let [conn (-> system :conn :store)]
+                     {:db db
+                      ::comm/broadcast {:dispatch [:voidwalker/data
+                                                   {::content/articles (content/get-post conn)
+                                                    ::t/tmpl [{::t/name "Ranklist"
+                                                               ::t/fn t/ranklist}]}]}})))
 
 
 (defn system-config [config]
@@ -57,6 +71,9 @@
 
 (defn dev-system []
     (system/gen-system system-config))
+
+
+
 
 (defn prod-system
   "Assembles and returns components for a production deployment"
