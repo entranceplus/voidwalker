@@ -47,26 +47,26 @@
 
 
 (defn system-config [config]
-  [:site-endpoint (component/using (new-endpoint site)
-                                   [:site-middleware])
-   :conn (new-konserve :type :filestore :path (config :db-path))
-   :api-endpoint (component/using (new-endpoint content-routes)
-                                  [:api-middleware :conn])
-   :site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
-   :api-middleware (new-middleware
-                    {:middleware  [rest-middleware
-                                   [wrap-defaults api-defaults]]})
-   :sente-endpoint (component/using
-                    (new-endpoint comm/sente-routes)
-                    [:comm :site-middleware])
-   :comm (component/using (comm/new-comm comm/event-msg-handler
-                                         comm/broadcast
-                                         request-handler)
-                          [:conn])
-   :broadcast-enabled?_ (atom true)
-   :handler (component/using (new-handler) [:sente-endpoint :api-endpoint :site-endpoint])
-   :api-server (component/using (new-immutant-web :port (system/get-port config))
-                                [:handler])])
+  [::site-endpoint (component/using (new-endpoint site)
+                                    [::site-middleware])
+   ::conn (new-konserve :type :filestore :path (config :db-path))
+   ::api-endpoint (component/using (new-endpoint content-routes)
+                                   [::api-middleware ::conn])
+   ::site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
+   ::api-middleware (new-middleware
+                     {:middleware  [rest-middleware
+                                    [wrap-defaults api-defaults]]})
+   ::sente-endpoint (component/using
+                     (new-endpoint comm/sente-routes)
+                     [::comm ::site-middleware])
+   ::comm (component/using (comm/new-comm comm/event-msg-handler
+                                          comm/broadcast
+                                          request-handler)
+                           [::conn])
+   ::broadcast-enabled?_ (atom true)
+   ::handler (component/using (new-handler) [::sente-endpoint ::api-endpoint ::site-endpoint])
+   ::api-server (component/using (new-immutant-web :port (system/get-port config ::http-port))
+                                 [::handler])])
 
 
 (defn dev-system []
