@@ -19,11 +19,11 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: voidwalker-{{checksum "build.boot"}}
+          key: voidwalker-{{checksum "deps.edn"}}
       - run: npm i -g shadow-cljs
       - run: npm i
-      - run: boot build
+      - run: clj -Atest
       - save_cache:
           paths:
             - /root/.m2
-          key: voidwalker-{{checksum "build.boot"}}
+          key: voidwalker-{{checksum "deps.edn"}}

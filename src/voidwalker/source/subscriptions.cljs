@@ -33,6 +33,4 @@
  :article
  (fn [_ id] (subscribe [:articles]))
  (fn [articles [_ id]]
-   (find-first (fn [article]
-                 (= (:id article) id))
-              articles)))
+   (get articles id)))

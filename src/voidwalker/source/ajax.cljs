@@ -11,6 +11,7 @@
         (update :headers #(merge {"x-csrf-token" js/csrfToken} %)))
     request))
 
+
 (defn load-interceptors! []
   (swap! ajax/default-interceptors
          conj

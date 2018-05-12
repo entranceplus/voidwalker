@@ -34,15 +34,18 @@
                :image {:src "https://entranceplus.in/images/header/ep-logo-white.svg"
                        :width "112"
                        :height "48"}}]]
-   ;
-   ; [:div {:class (when (= @(rf/subscribe [:page]) :add
-   ;                             "is-active"))}
+                                        ;
+                                        ; [:div {:class (when (= @(rf/subscribe [:page]) :add
+                                        ;                             "is-active"))}
    [:div.navbar-menu>div.navbar-start
     [nav-link {:route :voidwalker.add
                :text "Add"
                :nav? true}]
     [nav-link {:route :voidwalker.template
                :text "Templates"
+               :nav? true}]
+    [nav-link {:route :voidwalker.inline-editor
+               :text "Inline editor"
                :nav? true}]]])
 
 (def fcon (r/atom {:id 1}))
@@ -105,46 +108,12 @@
 ;; ;;  (reset! fcon (table-from-csv file-content))
 ;;   (table-from-csv  file-content))
 
-(defn add-datasource
-  [datasource]
-  (map (fn [{:keys [file-content name]}]
-         (let [csv (read-csv file-content :newline :cr+lf)]
-           (reset! datasource {:data (doall (gen-datasource-map csv))
-                               :name name})))))
-
-(defn get-files [e]
-  (array-seq (.. e -target -files)))
-
-(defn read-file
-  "read file and dispatch an event of [:file-content {:id :content}]"
-  [file c]
-  (println "Trying to read file name " (.-name file))
-  (let [reader (js/FileReader.)]
-    (gobj/set reader
-              "onload"
-              (fn [e]
-                (println "event called ")
-                (go (>! c {:file-content (.. e -target -result)
-                           :name (.-name file)}))))
-    (.readAsText reader file)))
-
-; (defn process-file
-;   [{{:keys [id content]} :file-content :as data}]
-;   (println "The id is " id "and content is " content)
-;   data)
-;
-; (def file-processor (map process-file))
-
-(defn file-input [{:keys [placeholder id]} c]
-  [:div.field.file.is-boxed>label.file-label
-   [:div.field>div.control
-    [:input.input.file-input
-     {:type "file"
-      :on-change (fn [e]
-                   (-> e get-files first (read-file c)))}]
-    [:span.file-cta
-      [:span.file-icon>i.fas.fa-upload]
-      [:span.file-label placeholder]]]])
+(defn csv->map
+  [file-content]
+  (-> file-content
+      (read-csv  :newline :cr+lf)
+      gen-datasource-map
+      doall))
 
 
 (defn input [{:keys [state placeholder type class]}]
@@ -163,12 +132,12 @@
    one atom because then it will re render after each change causing
    cursor to jump to start"
   (fn []
-     [(r/adapt-react-class Editor)
-      {:value @wb-atom
-       :init  {"plugins" "link image table"
-               "height" 200}
-       :on-change (fn [e]
-                    (reset! wb-atom (-> e .-target .getContent)))}]))
+    [(r/adapt-react-class Editor)
+     {:value @wb-atom
+      :init  {"plugins" "link image table"
+              "height" 200}
+      :on-change (fn [e]
+                   (reset! wb-atom (-> e .-target .getContent)))}]))
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; new article form ;;
@@ -209,19 +178,6 @@
   "will delete file identified by n from files atom"
   (remove #(= n (:name %)) files))
 
-(defn css-container
-  [files]
-  "A component containing upload button for css and the corres. file
-   indicators. Will have the files in files atom."
-  (r/with-let [ch (chan 10 (map #(swap! files conj %)))
-               del-ch (chan 10 (map (fn [name]
-                                      (swap! files delete-css name))))]
-    [:div.columns
-     [:div.column [file-input {:placeholder "Upload css"} ch]]
-     [:div.column>div.columns
-      (for [{:keys [name]} @files]
-        [:div.column {:key name} [file-view name del-ch]])]]))
-
 
 (def new-article (r/atom {}))
 
@@ -232,17 +188,12 @@
      [file/file-view {:name (str "Datasource: " name)
                       :key :datasource}])])
 
-
-
-(defn add-post-form [& {{:keys [url tags content title id css datasource]} :data}]
+(defn add-post-form [& {[id {:keys [url tags content title css datasource]}] :data}]
   (r/with-let [url (r/atom url)
                tags (r/atom (str/join "," tags))
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
-               datasource (r/atom  datasource)
-               file-chan (chan 10 (add-datasource datasource))
-               css-files (r/atom (map (fn [url] {:name url}) css))
                post-status (rf/subscribe [:new/post-status])]
     [:div.section>div.container
      [:div.title "New Article"]
@@ -254,33 +205,35 @@
       [input {:placeholder "Enter title"
               :state title}]
       [:div.field [(editor content wb)]]
-      ;; [:div.columns
-      ;;  [:div.column [file-input {:placeholder "Add a datasource"} file-chan]]
-      ;;  [:div.column [datasource-view @datasource]]]
-      ;; [css-container css-files]
-      [file/view {:id :datasource
+      [file/view {:type :datasource
+                  :id id
+                  :db-key :articles
+                  :process csv->map
                   :placeholder "Add a datasource"}]
-      [file/view {:id :css
+      [file/view {:type :css
+                  :id id
+                  :db-key :articles
                   :placeholder "Upload css"}]
       [:div.field>div.control>div>button.button.is-medium.is-primary
        {:on-click (fn [e]
                     (let [article  {:url @url
-                                    :id id
+                                    :id (when-not (= id ::new) id)
                                     :tags (str/split @tags #",")
-                                    :css @css-files
                                     :content @wb
-                                    :datasource @datasource
+                                    :datasource @(rf/subscribe [::file/files ::new :datasource])
+                                    :css @(rf/subscribe [::file/files id :css])
                                     :title @title}]
-                      (.preventDefault e)
-                      (when (some? id) (rf/dispatch [:update-article article]))
+                      (.preventDefault e)                      
+                      (when (and (some? id)
+                                 (not= id ::new)) (rf/dispatch [:update-article article]))
                       (rf/dispatch [:save-article article])))}
-       "Save article"]
+       "Save articleaa"]
       [progress-info @post-status]]]))
 
 (defn add-post
-  ([] (add-post-form))
+  ([] (add-post-form :data [::new nil]))
   ([id] (r/with-let [article-data @(rf/subscribe [:article id])]
-          (add-post-form :data article-data))))
+          (add-post-form :data [id article-data]))))
 
 ; (:content @new-article)
 
@@ -295,25 +248,23 @@
 ;; home-page ;;
 ;;;;;;;;;;;;;;;
 
-(def delete-post (map (fn [id]
-                        (println "Dispatching delete-post")
-                        (rf/dispatch [:delete-article id]))))
+(defn delete-post
+  [id]
+  (rf/dispatch [:delete-article id]))
 
 (defn article-view
-  [id title ch]
+  [id title]
   [:div.box {:key id}
    [:ul
     [nav-link {:route :voidwalker.edit
                :params {:id id}
                :text title}]
-    [:span.icon.is-medium.is-pulled-right  {:on-click #(go (>! ch id))}
+    [:span.icon.is-medium.is-pulled-right  {:on-click #(delete-post id)}
      [:i.fas.fa-trash-alt]]]])
 
 (defn home-page []
   (r/with-let [post-ch (chan 10 delete-post)]
     [:section.section>div.container
      [:h1.title "List of Posts"]
-     (map (fn [{:keys [title id]}]
-            (println "keys are " title id)
-            (article-view id title post-ch))
-          @(rf/subscribe [:articles]))]))
+     (for [[id {:keys [title]}] @(rf/subscribe [:articles])]
+       (article-view id title))]))

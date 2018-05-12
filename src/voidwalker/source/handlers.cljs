@@ -13,9 +13,27 @@
           :on-failure [:error-result]} request))
 
 (reg-event-db
-  :initialize-db
-  (fn [_ _]
-    db/default-db))
+ :initialize-db
+ (fn [_ _]
+   db/default-db))
+
+(reg-event-fx
+ :voidwalker/init
+ (fn [{:keys [db]} _]
+   {::comm/request {:data [:voidwalker/init]}
+    :db db}))
+
+(reg-event-fx
+ ::comm/connected
+ (fn [{:keys [db]} _]
+   {:db db
+    :dispatch [:voidwalker/init]}))
+
+(reg-event-db
+ :voidwalker/data
+ (fn [db [_ {:keys [:voidwalker.content/articles :voidwalker.template/tmpl]}]]
+   (assoc db :articles articles :voidwalker.template/tmpl tmpl)))
+
 
 ;; todo add better default error handling
 (reg-event-db
@@ -29,15 +47,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (reg-event-fx
-  :set-active-page
-  (fn [{:keys [db]} [_ page param]]
-    (let [db (assoc db :page page :page-param param)]
-      (println "setting page " page)
-      (case page
-        :voidwalker.home {:dispatch [:get-articles]
-                          :db db}
-        (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
-        {:db db}))))
+ :set-active-page
+ (fn [{:keys [db]} [_ page param]]
+   (let [db (assoc db :page page :page-param param)]
+     (println "setting page " page)
+     (case page
+       :voidwalker.home {:dispatch [:voidwalker/init]
+                         :db db}
+       (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
+       {:db db}))))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; listing article ;;
@@ -65,8 +83,8 @@
  :save-article
  (fn [{:keys [db]} [_ article]]
    (println "article is " article)
-   {::comm/request {:data {::comm/type :voidwalker.content/add
-                           :voidwalker.content/post article}
+   {::comm/request {:data [:snow.comm.core/trigger {::comm/type :voidwalker.content/add
+                                                    :voidwalker.content/post article}]
                     :on-success [:voidwalker.content/saved]
                     :on-failure [:error-post]}
     :db (assoc db :new/post-status :loading)}))
@@ -107,11 +125,3 @@
  (fn [db _]
    (println "Error occurred")
    (assoc db :new/post-status :error)))
-
-
-;; FILES stuff
-
-(reg-event-db
-  :file-content
-  (fn [db [_ {:keys [id content]}]]
-    (assoc db id content)))

@@ -21,3 +21,5 @@ package-lock.json
 profiles.edn
 void-konserve
 package-lock.json
+resources/public/js
+cljs-test-runner-out
