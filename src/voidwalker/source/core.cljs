@@ -14,11 +14,11 @@
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
             [snow.files.ui :as file]
-            [hickory.core :as h]
-            [voidwalker.source.routes :refer [nav-link]])
+            [hickory.core :as h]            
+            [voidwalker.source.routes :refer [nav-link]]
+            [voidwalker.source.csv :refer [csv->map]])
   (:require ["@tinymce/tinymce-react" :refer (Editor)])
   (:import goog.History))
-
 
 (defn about-page []
   [:div.container
@@ -49,71 +49,6 @@
                :nav? true}]]])
 
 (def fcon (r/atom {:id 1}))
-
-(def ^:private newlines
-  {:lf "\n" :cr+lf "\r\n"})
-
-(def ^:private newline-error-message
-  (str ":newline must be one of [" (str/join "," (keys newlines)) "]"))
-
-
-(defn read-csv
-  "Reads data from String in CSV-format."
-  [data & options]
-  (let [{:keys [separator newline] :or {separator "," newline :lf}} options]
-    (if-let [newline-char (get newlines newline)]
-      (->> (str/split data newline-char)
-           (map #(str/split % separator)))
-      (throw (js/Error. newline-error-message)))))
-
-(defn add-tag
-  [tag coll]
-  (let [o-tag (str "<" (name tag) ">")
-        c-tag (str "</" (name tag) ">")]
-    (reduce (fn [acc e]
-              (str acc o-tag e c-tag)) "" coll)))
-
-(defn csv-data->maps [csv-data]
-  (map zipmap
-       (->> (first csv-data) ;; First row is the header
-            ;;(map keyword) ;; Drop if you want string keys instead
-            repeat)
-       (rest csv-data)))
-
-(defn process-row [row]
-  (->>  row
-        (map (fn [[key value]]
-               {(-> key str/trim str/lower-case keyword) {:h key
-                                                          :c value}}))
-        (into {})))
-
-
-(defn gen-datasource-map [csv]
-  (->> (csv-data->maps csv)
-       (map process-row)))
-
-;; (csv-data->maps (read-csv @data))
-
-;; (defn table-from-csv [initial-html csv-data]
-;;   (let [csv ]
-;; ;    (reset! data csv)
-;;     {:view (str initial-html
-;;                 ;; (add-tag :table [(add-tag :tr [(add-tag :th (first csv))])
-;;                 ;;                  (add-tag :tr (map (fn [row]
-;;                 ;;                                      (add-tag :td row)) (rest csv)))])
-;;                 )
-;;      :data (gen-datasource-map csv)}))
-
-;; (defn gen-datasource [file-content]
-;; ;;  (reset! fcon (table-from-csv file-content))
-;;   (table-from-csv  file-content))
-
-(defn csv->map
-  [file-content]
-  (-> file-content
-      (read-csv  :newline :cr+lf)
-      gen-datasource-map
-      doall))
 
 
 (defn input [{:keys [state placeholder type class]}]
@@ -156,12 +91,7 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
-; <span class="icon is-large">
-;   <span class="fa-stack fa-lg">
-;     <i class="fas fa-camera fa-stack-1x"></i>
-;     <i class="fas fa-ban fa-stack-2x has-text-danger"></i>
-;   </span>
-; </span>
+
 (defn file-view
   "ch is the channel on which name will be sent when the
   delete button is clicked"
@@ -190,7 +120,7 @@
 
 (defn add-post-form [& {[id {:keys [url tags content title css datasource]}] :data}]
   (r/with-let [url (r/atom url)
-               tags (r/atom (str/join "," tags))
+               tags (r/atom (some->> tags (str/join ",")))
                title (r/atom title)
                content (r/atom content)
                wb (r/atom @content)
@@ -268,3 +198,5 @@
      [:h1.title "List of Posts"]
      (for [[id {:keys [title]}] @(rf/subscribe [:articles])]
        (article-view id title))]))
+
+

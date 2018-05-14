@@ -16,6 +16,7 @@
             [voidwalker.content :refer [content-routes] :as content]
             [voidwalker.dispatch :refer [request-handler]]
             [voidwalker.template :as t]
+            [voidwalker.template.ranklist :refer [root-tmpl]]
             [snow.comm.core :as comm]
             (system.components
              [postgres :refer [new-postgres-database]]
@@ -34,16 +35,18 @@
                          :formats [:json-kw]
                          :response-options {:json-kw {:pretty true}})))
 
+;; (def conn (-> (snow.repl/system) ::conn :store))
+
 (rf/reg-event-fx :voidwalker/init
                  [(rf/inject-cofx :system)]
                  (fn [{:keys [db system]} _]
                    (println "ok boyrs got init now will dispatch ")
-                   (let [conn (-> system :conn :store)]
+                   (let [conn (-> system ::conn :store)]
                      {:db db
                       ::comm/broadcast {:dispatch [:voidwalker/data
                                                    {::content/articles (content/get-post conn)
                                                     ::t/tmpl [{::t/name "Ranklist"
-                                                               ::t/fn t/ranklist}]}]}})))
+                                                               ::t/fun `root-tmpl}]}]}})))
 
 
 (defn system-config [config]
@@ -58,11 +61,11 @@
                                     [wrap-defaults api-defaults]]})
    ::sente-endpoint (component/using
                      (new-endpoint comm/sente-routes)
-                     [::comm ::site-middleware])
-   ::comm (component/using (comm/new-comm comm/event-msg-handler
-                                          comm/broadcast
-                                          request-handler)
-                           [::conn])
+                     [::comm/comm ::site-middleware])
+   ::comm/comm (component/using (comm/new-comm comm/event-msg-handler
+                                               comm/broadcast
+                                               request-handler)
+                                [::conn])
    ::broadcast-enabled?_ (atom true)
    ::handler (component/using (new-handler) [::sente-endpoint ::api-endpoint ::site-endpoint])
    ::api-server (component/using (new-immutant-web :port (system/get-port config ::http-port))

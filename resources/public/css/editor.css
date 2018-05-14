@@ -1,4 +1,3 @@
-
 html,
 input,
 textarea {
@@ -232,4 +231,8 @@ input:focus {
 
 .ep-nav-item {
   padding: 1.5 rem;
+}
+
+.template:hover {
+    
 }

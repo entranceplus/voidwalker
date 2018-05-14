@@ -241,7 +241,7 @@
   (update-post conn post id)
   (send-response (response/ok {:msg "Post updated"})))
 
-(defn content-routes [{{conn :store} :conn}]
+(defn content-routes [{{conn :store} :voidwalker.systems/conn}]
   (routes
    (context "/articles" []
             (GET "/" {{:keys [id]} :params}

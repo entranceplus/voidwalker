@@ -21,7 +21,7 @@
  :voidwalker/init
  (fn [{:keys [db]} _]
    {::comm/request {:data [:voidwalker/init]}
-    :db db}))
+    :db db/default-db}))
 
 (reg-event-fx
  ::comm/connected
@@ -52,10 +52,20 @@
    (let [db (assoc db :page page :page-param param)]
      (println "setting page " page)
      (case page
-       :voidwalker.home {:dispatch [:voidwalker/init]
-                         :db db}
+       (:voidwalker.home :voidwalker.template) {:dispatch [:voidwalker/init]
+                                                :db db}
        (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
        {:db db}))))
+
+(reg-event-fx
+ :navigate
+ (fn [{:keys [db]} [_ {:keys [route params perform?]}]]
+   (println "Route is " route perform?)
+   {:db (case route
+          (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
+          {:db db})
+    :dispatch [:voidwalker/init]
+    :snow.router/navigate (when-not perform? [route params])}))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; listing article ;;
@@ -92,6 +102,7 @@
 (reg-event-fx
  :delete-article
  (fn [{:keys [db]} [_ id]]
+   (println "delete article called for " id)
    {:http-xhrio (new-request {:method :delete
                               :uri (str "/articles/" id)
                               :on-success [:get-articles]

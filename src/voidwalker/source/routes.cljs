@@ -1,21 +1,12 @@
 (ns voidwalker.source.routes
-  (:require [bide.core :as b]))
-
-(defn transform-map [rmap]
-  (into []
-        (for [[r u] rmap]
-          [u r])))
-
-(defn make-bide-router [rmap]
-  (b/router (transform-map rmap)))
+  (:require [re-frame.core :as rf]))
 
 (def route-map {:voidwalker.home "/home"
                 :voidwalker.add "/add"
                 :voidwalker.edit "/edit/:id"
                 :voidwalker.template "/template"
+                :voidwalker.template.edit "/template/edit/:name"
                 :voidwalker.inline-editor "/inline/editor"})
-
-(def router (make-bide-router route-map))
 
 (defn nav-link [{:keys [route text params image nav? class]}]
   (println "texts is " text)
@@ -25,8 +16,10 @@
        :on-click (fn [e]
                    (do
                      (-> e .preventDefault)
-                     (println "clicked " route router)
-                     (b/navigate! router route params)))}
-      (if (some? text)
-          text
-          [:img image])])
+                     (println "cliscked " route)
+                     (rf/dispatch [:navigate {:route route
+                                              :param params}])))}
+   (if (some? text)
+     text
+     [:img image])])
+
