@@ -12,9 +12,13 @@
             [clojure.core.async :as async :refer [<!!]]
             [clojure.set :as c.s]
             [snow.repl :as r]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [taoensso.timbre :as timbre
+             :refer [log  trace  debug  info  warn  error  fatal  report
+                     logf tracef debugf infof warnf errorf fatalf reportf
+                     spy get-env]]))
 
-(defn get-conn [] (-> (r/system) :conn :store))
+(defn get-conn [] (-> (r/system) :voidwalker.systems/conn :store))
 
 (s/def ::url string?)
 (s/def ::content string?)
@@ -32,11 +36,13 @@
 
 (defn transact-data
   [conn spec data]
-  ; {:pre [(s/valid? spec data)]}
-  (println "data to be inserted  is " data)
+  ;; {:pre [(s/valid? spec data)]}
+  (info "data to be inserted in is " spec data)
   (let [id (u/uuid)]
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
+
+#_(transact-data (get-conn) ::post {:url "asdasd", :content [:div {} [:section {:class "exam"} [:h1 {} "asdasdTitle"] [:p {} "Description"]] [:section {:class "exam-list"}]], :title nil, :tags nil, :datasource nil, :css ()})
 
 (defn delete-data [conn ref]
   (<!! (k/update-in conn (butlast ref) (fn [coll]
@@ -51,6 +57,7 @@
 
 (defn update-data
   [conn spec data ref]
+  (info "updating post " ref data)
   (<!! (k/assoc-in conn [spec ref] data)))
 
 
@@ -78,17 +85,17 @@
 
 (defn process-post [{:keys [url content title tags css datasource] :as post}]
   {:url url
-   :content (when (some? content) (clojure.core/str "<div>"
-                                                    (str/replace content #"\n" "</div><div>")
-                                                    "</div>"))
-   ;; :content content
+   ;; :content (when (some? content) (clojure.core/str "<div>"
+   ;;                                                  (str/replace content #"\n" "</div><div>")
+   ;;                                                  "</div>"))
+   :content content
    :title title
    :tags tags
    :datasource datasource
    :css (process-css css)})
 
 (defn add-post [store {:keys [css] :as post}]
-  (println "Adding post " post)
+  (info "Adding post " post)
   (transact-data store ::post (process-post post)))
 
 
@@ -96,10 +103,10 @@
 (defn update-post [store {:keys [url content title tags css id] :as post}]
   (update-data store ::post (process-post post) id))
 
-; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
-; (<!! (k/get-in (get-conn) [::abc "def"]))
-; (<!! (k/get-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"]))
-; (<!! (k/update-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"] {:name "a"}))
+;; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
+;; (<!! (k/get-in (get-conn) [::abc "def"]))
+#_(count (<!! (k/get-in (get-conn) [::post])))
+;; (<!! (k/update-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"] {:name "a"}))
 ;; (def get-stuff (get-post (get-conn) {:id "26df8057-9501-466f-81f6-3249a2936240"}))
 
 ;; (def id  "26df8057-9501-466f-81f6-3249a2936240")
@@ -107,16 +114,16 @@
 
 
 ;; (delete-data (get-conn) [::post id])
-; (update-post (get-conn) (assoc get-stuff :tags ["def" "jkl" "a"]) 2)
-; CRU testing
-; @(h/transact (get-conn) [{:tags-sm ["abc" "de" "no"] :db/id 11}])
-;
-; (<!! (k/assoc-in (get-conn) [:temp] {:tags ["a" "b" "c"]}))
-;
-; (<!! (k/get-in (get-conn) [:temp]))
-;
-; (def update-data {::title "new title"})
-; @(h/transact conn [(merge update-data {:db/id 10})])
+                                        ; (update-post (get-conn) (assoc get-stuff :tags ["def" "jkl" "a"]) 2)
+                                        ; CRU testing
+                                        ; @(h/transact (get-conn) [{:tags-sm ["abc" "de" "no"] :db/id 11}])
+                                        ;
+                                        ; (<!! (k/assoc-in (get-conn) [:temp] {:tags ["a" "b" "c"]}))
+                                        ;
+                                        ; (<!! (k/get-in (get-conn) [:temp]))
+                                        ;
+                                        ; (def update-data {::title "new title"})
+                                        ; @(h/transact conn [(merge update-data {:db/id 10})])
 
 
 
@@ -221,7 +228,8 @@
          (aws/upload name {:content file-content})) css-files))
 
 (defn add-post-handler
-  [{{:keys [::post]} :data {{conn :store} :conn} :component}]
+  [{{:keys [::post]} :data {{conn :store} :voidwalker.systems/conn} :component}]
+  (info "Add post handler ::post" post)
   (let [p (if (:id post)
             (update-post conn post)
             (add-post conn post))]

@@ -16,8 +16,7 @@
    [v/navbar]
    (case route
      :voidwalker.home [v/home-page]
-     :voidwalker.add [v/add-post]
-     :voidwalker.edit [v/add-post (:id params)]
+     ;; :voidwalker.edit [v/add-post (:id params)]
      :voidwalker.template [t/template-view]
      :voidwalker.template.edit [t/inline-editor (:name params)]
      :voidwalker.inline-editor [i/page])])

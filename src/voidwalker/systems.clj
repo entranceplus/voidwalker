@@ -16,7 +16,6 @@
             [voidwalker.content :refer [content-routes] :as content]
             [voidwalker.dispatch :refer [request-handler]]
             [voidwalker.template :as t]
-            [voidwalker.template.ranklist :refer [root-tmpl]]
             [snow.comm.core :as comm]
             (system.components
              [postgres :refer [new-postgres-database]]
@@ -46,7 +45,7 @@
                       ::comm/broadcast {:dispatch [:voidwalker/data
                                                    {::content/articles (content/get-post conn)
                                                     ::t/tmpl [{::t/name "Ranklist"
-                                                               ::t/fun `root-tmpl}]}]}})))
+                                                               ::t/fun :ranklist}]}]}})))
 
 
 (defn system-config [config]

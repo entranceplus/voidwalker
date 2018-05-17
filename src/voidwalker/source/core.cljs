@@ -14,7 +14,8 @@
             [voidwalker.source.subscriptions]
             [voidwalker.source.util :refer [get-value]]
             [snow.files.ui :as file]
-            [hickory.core :as h]            
+            [snow.ui.components :refer [input]]
+            [hickory.core :as h]
             [voidwalker.source.routes :refer [nav-link]]
             [voidwalker.source.csv :refer [csv->map]])
   (:require ["@tinymce/tinymce-react" :refer (Editor)])
@@ -38,9 +39,6 @@
                                         ; [:div {:class (when (= @(rf/subscribe [:page]) :add
                                         ;                             "is-active"))}
    [:div.navbar-menu>div.navbar-start
-    [nav-link {:route :voidwalker.add
-               :text "Add"
-               :nav? true}]
     [nav-link {:route :voidwalker.template
                :text "Templates"
                :nav? true}]
@@ -50,15 +48,6 @@
 
 (def fcon (r/atom {:id 1}))
 
-
-(defn input [{:keys [state placeholder type class]}]
-  (println "State for " placeholder @state)
-  [:div.field>div.control [:input.input
-                           {:placeholder placeholder
-                            :class class
-                            :value @state
-                            :type (or type "text")
-                            :on-change #(reset! state (-> % get-value))}]])
 
 (defn editor
   [content wb-atom]
@@ -78,94 +67,8 @@
 ;; new article form ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 
-(defn progress-info [data]
-  (let [{:keys [class value]} (case data
-                                :loading {:class "alert-info"
-                                          :value "Saving Boss.."}
-                                :success {:class "alert-success"
-                                          :value "Saved.."}
-                                :error {:class "alert-fail"
-                                        :value "Failed to save"}
-                                {:class "hidden"
-                                 :value "Should not be seen.."})]
-    [:div>div.alert {:class class
-                     :role "alert"} value]))
 
-
-(defn file-view
-  "ch is the channel on which name will be sent when the
-  delete button is clicked"
-  [name ch]
-  [:div
-   [:div>span.icon.is-large
-    [:i.fab.fa-css3-alt.fa-3x]]
-   [:div name
-    [:span.icon.is-medium {:on-click #(go (>! ch name))}
-     [:i.fas.fa-trash-alt]]]])
-
-(defn delete-css
-  [files n]
-  "will delete file identified by n from files atom"
-  (remove #(= n (:name %)) files))
-
-
-(def new-article (r/atom {}))
-
-(defn datasource-view [ds]
-  [:div
-   (println "source " (-> ds first :name))
-   (for [{name :name} ds]
-     [file/file-view {:name (str "Datasource: " name)
-                      :key :datasource}])])
-
-(defn add-post-form [& {[id {:keys [url tags content title css datasource]}] :data}]
-  (r/with-let [url (r/atom url)
-               tags (r/atom (some->> tags (str/join ",")))
-               title (r/atom title)
-               content (r/atom content)
-               wb (r/atom @content)
-               post-status (rf/subscribe [:new/post-status])]
-    [:div.section>div.container
-     [:div.title "New Article"]
-     [:form
-      [input {:state url
-              :placeholder "Enter url"}]
-      [input {:placeholder "Comma separated keywords/tags"
-              :state tags}]
-      [input {:placeholder "Enter title"
-              :state title}]
-      [:div.field [(editor content wb)]]
-      [file/view {:type :datasource
-                  :id id
-                  :db-key :articles
-                  :process csv->map
-                  :placeholder "Add a datasource"}]
-      [file/view {:type :css
-                  :id id
-                  :db-key :articles
-                  :placeholder "Upload css"}]
-      [:div.field>div.control>div>button.button.is-medium.is-primary
-       {:on-click (fn [e]
-                    (let [article  {:url @url
-                                    :id (when-not (= id ::new) id)
-                                    :tags (str/split @tags #",")
-                                    :content @wb
-                                    :datasource @(rf/subscribe [::file/files ::new :datasource])
-                                    :css @(rf/subscribe [::file/files id :css])
-                                    :title @title}]
-                      (.preventDefault e)                      
-                      (when (and (some? id)
-                                 (not= id ::new)) (rf/dispatch [:update-article article]))
-                      (rf/dispatch [:save-article article])))}
-       "Save articleaa"]
-      [progress-info @post-status]]]))
-
-(defn add-post
-  ([] (add-post-form :data [::new nil]))
-  ([id] (r/with-let [article-data @(rf/subscribe [:article id])]
-          (add-post-form :data [id article-data]))))
-
-; (:content @new-article)
+;; (:content @new-article)
 
 ;; (def articles @(rf/subscribe [:articles]))
 

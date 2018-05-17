@@ -13,8 +13,6 @@
 
 ;; (def conn (-> (snow.repl/system) :conn :store))
 
-(def ranklist r/root-tmpl)
-
 ;; (load-string ranklist-template)         
 
 (defn add-template [conn {:keys [::name ::fun] :as t}]

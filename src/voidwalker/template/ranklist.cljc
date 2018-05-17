@@ -27,30 +27,10 @@
     [:p [:span (:h mode)] (:c mode)]
     [:a.last-info-content-child-a {:href (:c website)} "Visit Website"]]])
 
-(def editor-component #?(:clj (atom nil)
-                         :cljs (r/atom nil)))
-
-(def editor-content #?(:clj (atom nil)
-                       :cljs (r/atom nil)))
-
-(defn set-content [editor-component]
-  (->> (.-innerHTML editor-component)
-       h/parse-fragment
-       (map h/as-hiccup)
-       first))
-
-(defn content! []
-  (reset! editor-content (set-content @editor-component)))
-
-
-(def ce {:content-editable ::content-editable
-         :ref #(reset! editor-component %)
-         :on-input (fn [e] (content!))
-         :on-blur (fn [e] (content!))})
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
-(defn document [data]
+(defn template [data]
   (println "data is " data)
   [:div
    [:section.exam
@@ -63,16 +43,6 @@
 
 ;; (html (document @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource])))
 
-(defn root-tmpl [data]
-  [:div {:ref #(reset! editor-component %)
-         :on-input (fn [e] (content!))
-         :on-blur (fn [e] (content!))
-         :content-editable true
-         :dangerouslySetInnerHTML {:__html (html (document data))}}])
-
-(defn render [tmpl data]
-  (case tmpl
-    :ranklist [root-tmpl data]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

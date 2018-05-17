@@ -91,10 +91,11 @@
 
 (reg-event-fx
  :save-article
- (fn [{:keys [db]} [_ article]]
-   (println "article is " article)
-   {::comm/request {:data [:snow.comm.core/trigger {::comm/type :voidwalker.content/add
-                                                    :voidwalker.content/post article}]
+ (fn [{:keys [db]} [_ id]]
+   (println "id is " (get-in db [:articles id]))
+   {::comm/request {:data [:snow.comm.core/trigger
+                           {::comm/type :voidwalker.content/add
+                            :voidwalker.content/post (get-in db [:articles id])}]
                     :on-success [:voidwalker.content/saved]
                     :on-failure [:error-post]}
     :db (assoc db :new/post-status :loading)}))

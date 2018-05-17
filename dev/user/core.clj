@@ -17,6 +17,7 @@
   (do (repl/stop!)
       (repl/start! system-config)))
 
+#_(restart-systems!)
 
 #_(cljs-repl)
 

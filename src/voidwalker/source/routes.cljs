@@ -2,8 +2,7 @@
   (:require [re-frame.core :as rf]))
 
 (def route-map {:voidwalker.home "/home"
-                :voidwalker.add "/add"
-                :voidwalker.edit "/edit/:id"
+                ;; :voidwalker.edit "/edit/:id"
                 :voidwalker.template "/template"
                 :voidwalker.template.edit "/template/edit/:name"
                 :voidwalker.inline-editor "/inline/editor"})
