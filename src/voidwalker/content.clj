@@ -232,11 +232,15 @@
          (aws/upload name {:content file-content})) css-files))
 
 (defn add-post-handler
-  [{{:keys [::post]} :data {{conn :store} :voidwalker.systems/conn} :component}]
+  [{{:keys [::post]} :data
+    {{conn :store} :voidwalker.systems/conn} :component
+    reply-fn :?reply-fn}]
   (info "Add post handler ::post :id :title" (:id post) (:title post))
   (let [p (if (some? (:id post))
             (update-post conn post)
             (add-post conn post))]
+    (info "reply-fn is a fn " (fn? reply-fn))
+    (reply-fn {:msg :saved})
     (rf/dispatch [::saved (-> p :id)])))
 
 (rf/reg-event-fx

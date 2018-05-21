@@ -8,7 +8,6 @@
                 :voidwalker.inline-editor "/inline/editor/:id"})
 
 (defn nav-link [{:keys [route text params image nav? class]}]
-  (println "texts is " text)
   [:a {:href (route route-map)
        :class (or class
                   (when nav? "navbar-item is-hoverable"))

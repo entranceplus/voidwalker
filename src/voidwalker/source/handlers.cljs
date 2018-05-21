@@ -115,7 +115,7 @@
 (reg-event-db
  :voidwalker.content/saved
  (fn [db [_ id]]
-   (println )
+   (println "saved")
    (assoc db :new/post-status :success)))
 
 

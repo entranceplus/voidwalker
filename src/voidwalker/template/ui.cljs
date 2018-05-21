@@ -44,7 +44,6 @@
        first))
 
 (defn root-tmpl [{:keys [data template on-change content]}]
-  (println "content is " content)
   ;; (on-change)
   (r/create-class {:should-component-update (fn [_] false)
                    :display-name "editable editor"
@@ -115,10 +114,6 @@
                                                                     :on-change (partial content! (keyword id))}]
                                        :else [:div "Could not parse article"])]]))
 
-(def n (r/atom "Akash"))
-
-(reset! n "Hello")
-
 (defn template-view
   "card view for selecting templates"
   []
@@ -130,8 +125,7 @@
         {:on-click #(rf/dispatch [:navigate {:route :voidwalker.template.edit 
                                              :params {:fun fun
                                                       :id :voidwalker.content.ui/new}}])}
-        (name fun)])
-     [:div @n]]))
+        (name fun)])]))
 
 
 
