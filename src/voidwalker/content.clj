@@ -37,14 +37,15 @@
 (defn transact-data
   [conn spec data]
   ;; {:pre [(s/valid? spec data)]}
-  (info "data to be inserted in is " spec data)
-  (let [id (u/uuid)]
+  (info "data to be inserted in is " spec (keys data))
+  (let [id (-> (u/uuid) keyword)]
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
 
 #_(transact-data (get-conn) ::post {:url "asdasd", :content [:div {} [:section {:class "exam"} [:h1 {} "asdasdTitle"] [:p {} "Description"]] [:section {:class "exam-list"}]], :title nil, :tags nil, :datasource nil, :css ()})
 
 (defn delete-data [conn ref]
+  (info "trying to delete " ref)
   (<!! (k/update-in conn (butlast ref) (fn [coll]
                                          (dissoc coll (last ref))))))
 
@@ -57,7 +58,7 @@
 
 (defn update-data
   [conn spec data ref]
-  (info "updating post " ref data)
+  (info "updating post " ref)
   (<!! (k/assoc-in conn [spec ref] data)))
 
 
@@ -66,7 +67,8 @@
    eid to map"
   [coll]
   (into {} (map (fn [[id m]]
-                  (array-map id m)) coll)))
+                  (array-map (cond-> id
+                               (string? id) keyword) m)) coll)))
 
 (def sample-post {:url "http://wwwasas.google.com"
                   :content "A asa content \n go again"
@@ -95,7 +97,7 @@
    :css (process-css css)})
 
 (defn add-post [store {:keys [css] :as post}]
-  (info "Adding post " post)
+  (info "Adding post " (:id post) (:title post))
   (transact-data store ::post (process-post post)))
 
 
@@ -145,13 +147,15 @@
      (get-all-posts store))))
 
 ;; (def store (get-conn))
-;; (->> (get-all-posts (get-conn))
+
+#_(->  (get-conn) get-post keys)
+;; (->> (get-all-posts (get-conn)) first)
 ;;    (filter #(= (:title %) "qwdqwdwqd"))
 ;;    first
 ;;    :datasource
 ;;    first
 ;;    vals
-;;    first)
+;;    first
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -229,8 +233,8 @@
 
 (defn add-post-handler
   [{{:keys [::post]} :data {{conn :store} :voidwalker.systems/conn} :component}]
-  (info "Add post handler ::post" post)
-  (let [p (if (:id post)
+  (info "Add post handler ::post :id :title" (:id post) (:title post))
+  (let [p (if (some? (:id post))
             (update-post conn post)
             (add-post conn post))]
     (rf/dispatch [::saved (-> p :id)])))

@@ -4,8 +4,8 @@
 (def route-map {:voidwalker.home "/home"
                 ;; :voidwalker.edit "/edit/:id"
                 :voidwalker.template "/template"
-                :voidwalker.template.edit "/template/edit/:name"
-                :voidwalker.inline-editor "/inline/editor"})
+                :voidwalker.template.edit "/template/edit/:fun/:id"
+                :voidwalker.inline-editor "/inline/editor/:id"})
 
 (defn nav-link [{:keys [route text params image nav? class]}]
   (println "texts is " text)
@@ -17,7 +17,7 @@
                      (-> e .preventDefault)
                      (println "cliscked " route)
                      (rf/dispatch [:navigate {:route route
-                                              :param params}])))}
+                                              :params params}])))}
    (if (some? text)
      text
      [:img image])])

@@ -86,11 +86,12 @@
   (rf/dispatch [:delete-article id]))
 
 (defn article-view
-  [id title]
+  [id title template]
   [:div.box {:key id}
    [:ul
-    [nav-link {:route :voidwalker.edit
-               :params {:id id}
+    [nav-link {:route :voidwalker.template.edit
+               :params {:id id
+                        :fun :ranklist}
                :text title}]
     [:span.icon.is-medium.is-pulled-right  {:on-click #(delete-post id)}
      [:i.fas.fa-trash-alt]]]])
@@ -99,7 +100,7 @@
   (r/with-let [post-ch (chan 10 delete-post)]
     [:section.section>div.container
      [:h1.title "List of Posts"]
-     (for [[id {:keys [title]}] @(rf/subscribe [:articles])]
-       (article-view id title))]))
+     (for [[id {:keys [title template]}] @(rf/subscribe [:articles])]
+       (article-view id title template))]))
 
 

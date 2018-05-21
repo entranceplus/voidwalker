@@ -15,7 +15,7 @@
  :voidwalker.template/tmpl
  (fn [db _] (:voidwalker.template/tmpl db)))
 
-(def datasource-sub [::files/files :articles ::new :datasource])
+(def datasource-sub [::files/files ::new :datasource])
 
 (rf/reg-sub
  :voidwalker.template/fn
@@ -31,8 +31,8 @@
 
 (rf/reg-event-db
  :editor-change
- (fn [db [_ content]]
-   (assoc-in db [:articles :voidwalker.content.ui/new :content] content)))
+ (fn [db [_ id content]]
+   (assoc-in db [:articles id :content] content)))
 
 ;; used to hold refs to the editable document
 (def editor-component (r/atom nil))
@@ -43,20 +43,29 @@
        (map h/as-hiccup)
        first))
 
-(defn root-tmpl [data template on-change]
-  [:div {:ref #(reset! editor-component %)
-         :on-input on-change
-         :on-blur on-change
-         :content-editable true
-         :dangerouslySetInnerHTML {:__html (html (template data))}}])
+(defn root-tmpl [{:keys [data template on-change content]}]
+  (println "content is " content)
+  ;; (on-change)
+  (r/create-class {:should-component-update (fn [_] false)
+                   :display-name "editable editor"
+                   :reagent-render (fn [{:keys [data template on-change content]}]
+                                     [:div {:ref #(reset! editor-component %)
+                                            :on-input on-change
+                                            :on-blur on-change
+                                            :content-editable true
+                                            :dangerouslySetInnerHTML {:__html (html (if (some? content)
+                                                                                      content
+                                                                                      (template data)))}}])}))
 
-(defn content! []
-  (rf/dispatch [:editor-change (set-content @editor-component)]))
+(defn content! [id]
+  (rf/dispatch [:editor-change id (some-> @editor-component set-content)]))
 
 
-(defn render [tmpl data]
+(defn render [id tmpl data]
   (case tmpl
-    :ranklist [root-tmpl data rk/template content!]))
+    :ranklist [root-tmpl {:data data
+                          :template  rk/template
+                          :on-change (partial content! id)}]))
 
 (defn progress-info
   "element to state wether the article was saved or not"
@@ -73,10 +82,14 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
-(defn inline-editor [template-name]
-  (r/with-let [tmpl (rf/subscribe [:voidwalker.template/fn "Ranklist"])
-               file-data (rf/subscribe datasource-sub)
-               post-status (rf/subscribe [:new/post-status])]
+(defn inline-editor
+  "fun is the template fn and id is articles id..
+  both are strings and have to be converted to keyword eventually"
+  [fun id]
+  (r/with-let [file-data (rf/subscribe [::files/files ::new :datasource])
+               post-status (rf/subscribe [:new/post-status])
+               article (rf/subscribe [:article (keyword id)])]
+    (println "Article id is " (keyword id))
     [:div
      [:section.section>div.container [files/view {:type :datasource
                                                   :id ::new
@@ -84,19 +97,27 @@
                                                   :placeholder "Add a datasource"}]]
      [:section.section>div.container
       [ui/rx-input {:db-key [:articles
-                             :voidwalker.content.ui/new
+                             (keyword id)
                              :url]
                     :placeholder "Enter url"}]
       [ui/rx-input {:db-key [:articles
-                             :voidwalker.content.ui/new
+                             (keyword id)
                              :title]
                     :placeholder "Enter title"}]]
      [:section.section>div.container
       [:div.button.is-medium.is-primary
-       {:on-click #(rf/dispatch [:save-article :voidwalker.content.ui/new])} "Save article"]
+       {:on-click #(rf/dispatch [:save-article (keyword id)])} "Save article"]
       [:div [progress-info @post-status]]]
      
-     [:section.section>div.container (render :ranklist @file-data)]]))
+     [:section.section>div.container (cond
+                                       (= (keyword id) :new) (render (keyword id) (keyword fun) @file-data)
+                                       (some? @article) [root-tmpl {:content (:content @article)
+                                                                    :on-change (partial content! (keyword id))}]
+                                       :else [:div "Could not parse article"])]]))
+
+(def n (r/atom "Akash"))
+
+(reset! n "Hello")
 
 (defn template-view
   "card view for selecting templates"
@@ -104,11 +125,13 @@
   (r/with-let [tmpls (rf/subscribe [:voidwalker.template/tmpl])]
     (println "tmpls s " tmpls)
     [:div>section.section>div.columns
-     (for [{:keys [voidwalker.template/name]} @tmpls]
+     (for [{:keys [voidwalker.template/fun]} @tmpls]
        [:div.column.is-one-quarter>div.box.template
         {:on-click #(rf/dispatch [:navigate {:route :voidwalker.template.edit 
-                                             :params {:name name}}])}
-        name])]))
+                                             :params {:fun fun
+                                                      :id :voidwalker.content.ui/new}}])}
+        (name fun)])
+     [:div @n]]))
 
 
 

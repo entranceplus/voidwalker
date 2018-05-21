@@ -18,8 +18,8 @@
      :voidwalker.home [v/home-page]
      ;; :voidwalker.edit [v/add-post (:id params)]
      :voidwalker.template [t/template-view]
-     :voidwalker.template.edit [t/inline-editor (:name params)]
-     :voidwalker.inline-editor [i/page])])
+     :voidwalker.template.edit [t/inline-editor (:fun params) (:id params)]
+     :voidwalker.inline-editor [i/page ])])
 
 
 (defn on-navigate
