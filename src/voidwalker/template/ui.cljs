@@ -118,7 +118,6 @@
   "card view for selecting templates"
   []
   (r/with-let [tmpls (rf/subscribe [:voidwalker.template/tmpl])]
-    (println "tmpls s " tmpls)
     [:div>section.section>div.columns
      (for [{:keys [voidwalker.template/fun]} @tmpls]
        [:div.column.is-one-quarter>div.box.template

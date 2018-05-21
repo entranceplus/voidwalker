@@ -34,15 +34,18 @@
 
 (s/check-asserts true)
 
+(def a nil)
+
 (defn transact-data
   [conn spec data]
   ;; {:pre [(s/valid? spec data)]}
-  (info "data to be inserted in is " spec (keys data))
+  (info "data to be inserted in is " conn spec (keys data))
   (let [id (-> (u/uuid) keyword)]
+    (def a (assoc-in a [spec id] data))
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
 
-#_(transact-data (get-conn) ::post {:url "asdasd", :content [:div {} [:section {:class "exam"} [:h1 {} "asdasdTitle"] [:p {} "Description"]] [:section {:class "exam-list"}]], :title nil, :tags nil, :datasource nil, :css ()})
+#_(transact-data (get-conn) ::post {:url "asdasd", :content nil, :title "tio", :tags nil, :datasource nil, :css ()})
 
 (defn delete-data [conn ref]
   (info "trying to delete " ref)
@@ -243,6 +246,14 @@
     (reply-fn {:msg :saved})
     (rf/dispatch [::saved (-> p :id)])))
 
+(defn delete-post-handler
+  [{{:keys [id]} :data
+    {{conn :store} :voidwalker.systems/conn} :component
+    reply-fn :?reply-fn}]
+  (info "Deleting post " id)
+  (delete-data conn [::post (keyword id)])
+  (reply-fn {:msg :deleted}))
+
 (rf/reg-event-fx
  ::saved
  (fn [{db :db} [_ id]]
@@ -257,6 +268,8 @@
   (update-post conn post id)
   (send-response (response/ok {:msg "Post updated"})))
 
+
+
 (defn content-routes [{{conn :store} :voidwalker.systems/conn}]
   (routes
    (context "/articles" []
@@ -269,7 +282,7 @@
                     (handle-update-post conn post)
                     (handle-add-post conn post)))
             (DELETE "/:id" [id]
-                    (delete-data conn [::post id])
+                    (delete-data conn [::post (keyword id)])
                     (send-response (response/ok {:msg "deleted"})))
             (POST "/file" {:keys [body]}
                   (send-response (response/ok (slurp body)))))))

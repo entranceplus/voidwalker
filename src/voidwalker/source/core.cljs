@@ -86,7 +86,7 @@
   (rf/dispatch [:delete-article id]))
 
 (defn article-view
-  [id title template]
+  [id title]
   [:div.box {:key id}
    [:ul
     [nav-link {:route :voidwalker.template.edit
@@ -97,10 +97,9 @@
      [:i.fas.fa-trash-alt]]]])
 
 (defn home-page []
-  (r/with-let [post-ch (chan 10 delete-post)]
-    [:section.section>div.container
-     [:h1.title "List of Posts"]
-     (for [[id {:keys [title template]}] @(rf/subscribe [:articles])]
-       (article-view id title template))]))
+  [:section.section>div.container
+   [:h1.title "List of Posts"]
+   (for [[id {:keys [title]}] @(rf/subscribe [:articles])]
+     (article-view id title))])
 
 

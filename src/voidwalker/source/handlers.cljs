@@ -106,10 +106,11 @@
  :delete-article
  (fn [{:keys [db]} [_ id]]
    (println "delete article called for " id)
-   {:http-xhrio (new-request {:method :delete
-                              :uri (str "/articles/" id)
-                              :on-success [:get-articles]
-                              :on-failure [:error-post]})
+   {::comm/request {:data [:snow.comm.core/trigger
+                           {::comm/type :voidwalker.content/delete
+                            :id id}]
+                    :on-success [:voidwalker/init]
+                    :on-failure [:error-post]}
     :db db}))
 
 (reg-event-db
