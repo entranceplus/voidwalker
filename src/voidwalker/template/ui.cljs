@@ -43,28 +43,32 @@
        (map h/as-hiccup)
        first))
 
+
 (defn root-tmpl [{:keys [data template on-change content]}]
   ;; (on-change)
-  (r/create-class {:should-component-update (fn [_] false)
+  (r/create-class {:should-component-update (fn [this old-argv [_ {data :data}]]
+                                              (if (some? data)
+                                                true
+                                                false))
                    :display-name "editable editor"
                    :reagent-render (fn [{:keys [data template on-change content]}]
+                                     (println "render " data)
                                      [:div {:ref #(reset! editor-component %)
                                             :on-input on-change
                                             :on-blur on-change
                                             :content-editable true
-                                            :dangerouslySetInnerHTML {:__html (html (if (some? content)
-                                                                                      content
-                                                                                      (template data)))}}])}))
+                                            :dangerouslySetInnerHTML {:__html (html (template data content))}}])}))
 
 (defn content! [id]
   (rf/dispatch [:editor-change id (some-> @editor-component set-content)]))
 
 
-(defn render [id tmpl data]
+(defn render [id tmpl data content]
   (case tmpl
-    :ranklist [root-tmpl {:data data
+    :ranklist [root-tmpl {:data @data
                           :template  rk/template
-                          :on-change (partial content! id)}]))
+                          :on-change (partial content! id)
+                          :content content}]))
 
 (defn progress-info
   "element to state wether the article was saved or not"
@@ -109,7 +113,10 @@
       [:div [progress-info @post-status]]]
      
      [:section.section>div.container (cond
-                                       (= (keyword id) :new) (render (keyword id) (keyword fun) @file-data)
+                                       (= (keyword id) :new) (render (keyword id)
+                                                                     (keyword fun)
+                                                                     file-data
+                                                                     (:content @article))
                                        (some? @article) [root-tmpl {:content (:content @article)
                                                                     :on-change (partial content! (keyword id))}]
                                        :else [:div "Could not parse article"])]]))

@@ -17,6 +17,10 @@
             [voidwalker.dispatch :refer [request-handler]]
             [voidwalker.template :as t]
             [snow.comm.core :as comm]
+            [taoensso.timbre :as timbre
+             :refer [log  trace  debug  info  warn  error  fatal  report
+                     logf tracef debugf infof warnf errorf fatalf reportf
+                     spy get-env]]
             (system.components
              [postgres :refer [new-postgres-database]]
              [immutant-web :refer [new-immutant-web]]
@@ -39,7 +43,7 @@
 (rf/reg-event-fx :voidwalker/init
                  [(rf/inject-cofx :system)]
                  (fn [{:keys [db system]} _]
-                   (println "ok boyrs got init now will dispatch ")
+                   (info "ok boyrs got init now will dispatch ")
                    (let [conn (-> system ::conn :store)]
                      {:db db
                       ::comm/broadcast {:dispatch [:voidwalker/data

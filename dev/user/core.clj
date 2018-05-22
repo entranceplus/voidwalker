@@ -25,10 +25,14 @@
   (server/start!)
   (shadow/dev :app))
 
+#_(compile-cljs)
+
+#_(shadow/release :app)
+
 (defn -main [& args]
   (println "Starting systems...")
   (repl/start! system-config)
   (repl/start-nrepl)
   (println "nrepl started")
   (server/start!)
-  (shadow/dev :app)  )
+  (shadow/dev :app))

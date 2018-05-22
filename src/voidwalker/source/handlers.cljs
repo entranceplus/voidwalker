@@ -32,6 +32,7 @@
 (reg-event-db
  :voidwalker/data
  (fn [db [_ {:keys [:voidwalker.content/articles :voidwalker.template/tmpl]}]]
+   (println "received initial data")
    (assoc db :articles articles :voidwalker.template/tmpl tmpl)))
 
 

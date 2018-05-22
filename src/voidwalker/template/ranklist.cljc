@@ -30,12 +30,12 @@
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
-(defn template [data]
-  (println "data is " data)
-  [:div
-   [:section.exam
-    [:h1 "Title"]
-    [:p "Description"]]
+(defn template  
+  [data content]
+  [:div (or content
+            [:div [:section.exam
+                   [:h1 "Title"]
+                   [:p "Description"]]])
    (cond-> [:section.exam-list ]
      (some? data)  (conj (->> data
                               vals first
