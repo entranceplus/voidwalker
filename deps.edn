@@ -1,6 +1,6 @@
 {:deps {selmer {:mvn/version "1.11.7"}
         snow {:git/url "https://github.com/entranceplus/snow"
-              :sha " bd1a06683522a8d95521cdea14cb8d0052775105"
+              :sha "bd1a06683522a8d95521cdea14cb8d0052775105"
               ;; :local/root "../snow"
               }
         metosin/ring-http-response {:mvn/version "0.9.0"} 
