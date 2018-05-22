@@ -43,21 +43,20 @@
        (map h/as-hiccup)
        first))
 
-
 (defn root-tmpl [{:keys [data template on-change content]}]
   ;; (on-change)
   (r/create-class {:should-component-update (fn [this old-argv [_ {data :data}]]
                                               (if (some? data)
                                                 true
                                                 false))
+                   :component-did-update (fn [_ _] (on-change))
                    :display-name "editable editor"
                    :reagent-render (fn [{:keys [data template on-change content]}]
-                                     (println "render " data)
                                      [:div {:ref #(reset! editor-component %)
                                             :on-input on-change
                                             :on-blur on-change
                                             :content-editable true
-                                            :dangerouslySetInnerHTML {:__html (html (template data content))}}])}))
+                                            :dangerouslySetInnerHTML {:__html (html (rk/template data content))}}])}))
 
 (defn content! [id]
   (rf/dispatch [:editor-change id (some-> @editor-component set-content)]))
@@ -118,7 +117,8 @@
                                                                      file-data
                                                                      (:content @article))
                                        (some? @article) [root-tmpl {:content (:content @article)
-                                                                    :on-change (partial content! (keyword id))}]
+                                                                    :on-change (partial content! (keyword id))
+                                                                    :data @file-data}]
                                        :else [:div "Could not parse article"])]]))
 
 (defn template-view

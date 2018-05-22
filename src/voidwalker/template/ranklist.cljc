@@ -30,6 +30,8 @@
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
+
+
 (defn template  
   [data content]
   [:div (or content
