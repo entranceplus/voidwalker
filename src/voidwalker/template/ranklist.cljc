@@ -12,20 +12,21 @@
             #?(:clj [hiccup.core :refer [html]])))
 
 (defn- data-tmpl  [idx {:keys [name location website mhrd placement mq mode]}]
-  [:div.list {:key idx}
+  [:div.exam-list-container>div.list-container {:key idx}
    [:div.list-heading
     [:p (+ idx 1)]
     [:p (:c name)]]
-   [:div.list-content
-    [:p [:span (str (:h location) ":")] (:c location)]
-    [:p [:span (:h  mhrd)] (:c mhrd)]
-    [:p [:span (:h  placement)] (:c placement)]]
-   [:div.list-content
-    [:p [:span (:h mq)]  (if (empty? (:c mq))
-                           "No"
-                           (:c mq))]
-    [:p [:span (:h mode)] (:c mode)]
-    [:a.last-info-content-child-a {:href (:c website)} "Visit Website"]]])
+   [:div.list-info-container
+    [:div.list-info-content
+     [:p [:span (str (:h location) ":")] (:c location)]
+     [:p [:span (:h  mhrd)] (:c mhrd)]
+     [:p.last-info-content-child [:span (:h  placement)] (:c placement)]]
+    [:div.list-info-content
+     [:p [:span (:h mq)]  (if (empty? (:c mq))
+                            "No"
+                            (:c mq))]
+     [:p [:span (:h mode)] (:c mode)]
+     [:a.last-info-content-child-a {:href (:c website)} "Visit Website"]]]])
 
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))

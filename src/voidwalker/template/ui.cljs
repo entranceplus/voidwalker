@@ -45,11 +45,10 @@
 
 (defn root-tmpl [{:keys [data template on-change content]}]
   ;; (on-change)
-  (r/create-class {:should-component-update (fn [this old-argv [_ {data :data}]]
-                                              (if (some? data)
-                                                true
+  (r/create-class {:should-component-update (fn [this [_ {d0 :data}] [_ {d1 :data}]]
+                                              (if (not= d0 d1)
+                                                (do (println "oh") true)
                                                 false))
-                   :component-did-update (fn [_ _] (on-change))
                    :display-name "editable editor"
                    :reagent-render (fn [{:keys [data template on-change content]}]
                                      [:div {:ref #(reset! editor-component %)
