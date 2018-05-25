@@ -25,12 +25,17 @@
 
 
 (defn find-first
-         [f coll]
-         (first (filter f coll)))
-
+  [f coll]
+  (first (filter f coll)))
 
 (reg-sub
  :article
  (fn [_ id] (subscribe [:articles]))
  (fn [articles [_ id]]
    (get articles id)))
+
+(reg-sub
+ :article-content
+ (fn [_ _] (subscribe [:articles]))
+ (fn [articles [_ id]]
+   (get-in articles [id :content])))

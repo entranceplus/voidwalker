@@ -66,7 +66,7 @@
           (:voidwalker.add :edit) {:db (dissoc db :new/post-status)}
           {:db db})
     :dispatch [:voidwalker/init]
-    :snow.router/navigate (when-not perform? [route params])}))
+    :snow.router/navigate (when perform? [route params])}))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; listing article ;;

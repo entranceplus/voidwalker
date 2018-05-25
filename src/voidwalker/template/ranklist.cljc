@@ -31,18 +31,22 @@
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
+(defn article-template []
+  [:article.article-full ])
 
 
 (defn template  
-  [data content]
+  [content]
+  (println "template is " content)
   [:div (or content
             [:div [:section.exam
                    [:h1 "Title"]
                    [:p "Description"]]])
-   (cond-> [:section.exam-list ]
-     (some? data)  (conj (->> data
-                              vals first
-                              (map-indexed data-tmpl))))])
+   ;; (cond-> [:section.exam-list ]
+   ;;   (some? data)  (conj (->> data
+   ;;                            vals first
+   ;;                            (map-indexed data-tmpl))))
+   ])
 
 ;; (html (document @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource])))
 

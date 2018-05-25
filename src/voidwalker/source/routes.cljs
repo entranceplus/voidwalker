@@ -16,7 +16,8 @@
                      (-> e .preventDefault)
                      (println "cliscked " route)
                      (rf/dispatch [:navigate {:route route
-                                              :params params}])))}
+                                              :params params
+                                              :perform? true}])))}
    (if (some? text)
      text
      [:img image])])

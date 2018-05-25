@@ -35,7 +35,7 @@
    (assoc-in db [:articles id :content] content)))
 
 ;; used to hold refs to the editable document
-(def editor-component (r/atom nil))
+(def editor-component (r/atom 1))
 
 (defn set-content [editor-component]
   (->> (.-innerHTML editor-component)
@@ -43,30 +43,40 @@
        (map h/as-hiccup)
        first))
 
-(defn root-tmpl [{:keys [data template on-change content]}]
+(def *editor-content* (fn [] (some-> @editor-component set-content)))
+
+(defn root-tmpl [{:keys [template on-change content]}]
   ;; (on-change)
-  (r/create-class {:should-component-update (fn [this [_ {d0 :data}] [_ {d1 :data}]]
-                                              (if (not= d0 d1)
-                                                (do (println "oh") true)
-                                                false))
-                   :display-name "editable editor"
-                   :reagent-render (fn [{:keys [data template on-change content]}]
-                                     [:div {:ref #(reset! editor-component %)
-                                            :on-input on-change
-                                            :on-blur on-change
-                                            :content-editable true
-                                            :dangerouslySetInnerHTML {:__html (html (rk/template data content))}}])}))
+  (fn [{:keys [data template on-change content]}]    
+    [:div {:ref #(reset! editor-component %)
+           :on-input on-change
+           :on-blur on-change
+           :content-editable true
+           :dangerouslySetInnerHTML {:__html (html (rk/template @content))}}]))
 
 (defn content! [id]
-  (rf/dispatch [:editor-change id (some-> @editor-component set-content)]))
+  (rf/dispatch [:editor-change id (*editor-content*)]))
 
+(rf/reg-event-db
+ ::update
+ (fn [db [_ id tmpl]]
+   (println "updating ar " id tmpl)
+   (assoc-in db [:articles id :tmpl] tmpl)))
 
-(defn render [id tmpl data content]
-  (case tmpl
-    :ranklist [root-tmpl {:data @data
-                          :template  rk/template
-                          :on-change (partial content! id)
-                          :content content}]))
+(def tmpl :ranklist)
+(def article (rf/subscribe [:article :620f64b6-8811-42c8-ab4b-0ae703b9ecd7]))
+
+(defn render [{:keys [id data tmpl on-change content]}]
+  ;; (rf/dispatch [::update id tmpl])
+  (println "tmpl is " data tmpl content)
+  [root-tmpl {;; :data @data
+              :template  rk/template
+              :on-change (partial content! id)
+              :content content}]
+  ;; (case tmpl
+  ;;   :ranklist 
+  ;;   [:div "Could not parse article"])
+  )
 
 (defn progress-info
   "element to state wether the article was saved or not"
@@ -83,17 +93,29 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
+(rf/reg-event-db
+ :data-change 
+ (fn [db [_ id file-data]]
+   (println "content is file " file-data)
+   (update-in db
+              [:articles id :content]
+              #(cond-> %
+                 (some? file-data)  (conj [:section.exam-list
+                                           (map-indexed rk/data-tmpl file-data)])))))
+
 (defn inline-editor
   "fun is the template fn and id is articles id..
   both are strings and have to be converted to keyword eventually"
   [fun id]
   (r/with-let [file-data (rf/subscribe [::files/files ::new :datasource])
                post-status (rf/subscribe [:new/post-status])
-               article (rf/subscribe [:article (keyword id)])]
-    (println "Article id is " (keyword id))
+               article  (rf/subscribe [:article (keyword id)])
+               content (rf/subscribe [:article-content (keyword id)])]
+    (println "Article id is " (keyword id) content)
     [:div
      [:section.section>div.container [files/view {:type :datasource
                                                   :id ::new
+                                                  :dispatch [:data-change (keyword id)]
                                                   :process csv->map
                                                   :placeholder "Add a datasource"}]]
      [:section.section>div.container
@@ -110,15 +132,11 @@
        {:on-click #(rf/dispatch [:save-article (keyword id)])} "Save article"]
       [:div [progress-info @post-status]]]
      
-     [:section.section>div.container (cond
-                                       (= (keyword id) :new) (render (keyword id)
-                                                                     (keyword fun)
-                                                                     file-data
-                                                                     (:content @article))
-                                       (some? @article) [root-tmpl {:content (:content @article)
-                                                                    :on-change (partial content! (keyword id))
-                                                                    :data @file-data}]
-                                       :else [:div "Could not parse article"])]]))
+     [:section.section>div.container [render {:id (keyword id)
+                                              :tmpl (or (:tmpl @article)
+                                                        (keyword fun))
+                                              :data file-data
+                                              :content content}]]]))
 
 (defn template-view
   "card view for selecting templates"

@@ -7,6 +7,8 @@
             [voidwalker.source.core :as v]
             [voidwalker.template.ui :as t]
             [voidwalker.source.inline :as i]
+            ;; to ensure all subscriptions are loaded
+            [voidwalker.source.subscriptions]
             [re-frame.core :as rf]))
 
 (enable-console-print!)
@@ -16,7 +18,6 @@
    [v/navbar]
    (case route
      :voidwalker.home [v/home-page]
-     ;; :voidwalker.edit [v/add-post (:id params)]
      :voidwalker.template [t/template-view]
      :voidwalker.template.edit [t/inline-editor (:fun params) (:id params)]
      :voidwalker.inline-editor [i/page ])])
