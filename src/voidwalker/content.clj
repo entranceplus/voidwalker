@@ -89,15 +89,7 @@
              name)))))
 
 (defn process-post [{:keys [url content title tags css datasource] :as post}]
-  {:url url
-   ;; :content (when (some? content) (clojure.core/str "<div>"
-   ;;                                                  (str/replace content #"\n" "</div><div>")
-   ;;                                                  "</div>"))
-   :content content
-   :title title
-   :tags tags
-   :datasource datasource
-   :css (process-css css)})
+  (merge post {:css (process-css css)}))
 
 (defn add-post [store {:keys [css] :as post}]
   (info "Adding post " (:id post) (:title post))

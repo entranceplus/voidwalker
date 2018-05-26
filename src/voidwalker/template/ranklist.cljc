@@ -11,33 +11,48 @@
             [clojure.zip :as z]
             #?(:clj [hiccup.core :refer [html]])))
 
-(defn- data-tmpl  [idx {:keys [name location website mhrd placement mq mode]}]
+
+(defn data-tmpl  [idx {:keys [name location website mhrd placement mq mode]}]
   [:div.exam-list-container>div.list-container {:key idx}
    [:div.list-heading
     [:p (+ idx 1)]
     [:p (:c name)]]
    [:div.list-info-container
     [:div.list-info-content
-     [:p [:span (str (:h location) ":")] (:c location)]
+     [:p [:span (some-> location :h (str ":"))] (:c location)]
      [:p [:span (:h  mhrd)] (:c mhrd)]
      [:p.last-info-content-child [:span (:h  placement)] (:c placement)]]
     [:div.list-info-content
-     [:p [:span (:h mq)]  (if (empty? (:c mq))
+     [:p [:span (:h mq)]  (if (and (empty? (:c mq))
+                                   (some? (:h mq)))
                             "No"
                             (:c mq))]
      [:p [:span (:h mode)] (:c mode)]
      [:a.last-info-content-child-a {:href (:c website)} "Visit Website"]]]])
 
+(defn engg-list-tmpl  [idx {:keys [name website state]}]
+  [:div.exam-list-container>div.list-container {:key idx}
+   [:div.list-heading
+    [:p (+ idx 1)]
+    [:p (:c name)]]
+   [:div.list-info-container
+    [:div.list-info-content
+     [:p [:span (some-> state :h (str ":"))] (:c state)]
+     [:a.last-info-content-child-a {:href (:c website)} "Visit Website"]]]])
+
 
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
-(defn article-template []
-  [:article.article-full ])
+(defn article-template [content] 
+  [:article.article-full (or content
+                             [:div
+                              [:h1.heading "Title"]
+                              [:p.sub-heading "Description"]
+                              [:p.article-content "Some content goes here"]])])
 
 
 (defn template  
   [content]
-  (println "template is " content)
   [:div (or content
             [:div [:section.exam
                    [:h1 "Title"]

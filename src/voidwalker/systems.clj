@@ -49,7 +49,11 @@
                       ::comm/broadcast {:dispatch [:voidwalker/data
                                                    {::content/articles (content/get-post conn)
                                                     ::t/tmpl [{::t/name "Ranklist"
-                                                               ::t/fun :ranklist}]}]}})))
+                                                               ::t/fun :ranklist}
+                                                              {::t/name "Examlist"
+                                                               ::t/fun :examlist}
+                                                              {::t/name "Blog"
+                                                               ::t/fun :blog}]}]}})))
 
 
 (defn system-config [config]

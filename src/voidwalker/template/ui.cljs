@@ -47,12 +47,22 @@
 
 (defn root-tmpl [{:keys [template on-change content]}]
   ;; (on-change)
-  (fn [{:keys [data template on-change content]}]    
-    [:div {:ref #(reset! editor-component %)
-           :on-input on-change
-           :on-blur on-change
-           :content-editable true
-           :dangerouslySetInnerHTML {:__html (html (rk/template @content))}}]))
+  (r/create-class {:should-component-update (fn [this
+                                                [_ {d0 :data c0 :content}]
+                                                [_ {d1 :data c1 :content}]]
+                                              (if (or (not= d0 d1)
+                                                      (and (nil? c0)
+                                                           (some? c1)))
+                                                (do (println "re rendering editor")
+                                                    true)
+                                                false))
+                   :display-name "inline-editor"
+                   :reagent-render (fn [{:keys [template on-change content]}]
+                                     [:div {:ref #(reset! editor-component %)
+                                            :on-input on-change
+                                            :on-blur on-change
+                                            :content-editable true
+                                            :dangerouslySetInnerHTML {:__html (html (template content))}}])}))
 
 (defn content! [id]
   (rf/dispatch [:editor-change id (*editor-content*)]))
@@ -60,23 +70,27 @@
 (rf/reg-event-db
  ::update
  (fn [db [_ id tmpl]]
-   (println "updating ar " id tmpl)
+   (println "updating are " id tmpl)
    (assoc-in db [:articles id :tmpl] tmpl)))
 
 (def tmpl :ranklist)
-(def article (rf/subscribe [:article :620f64b6-8811-42c8-ab4b-0ae703b9ecd7]))
+(def id :620f64b6-8811-42c8-ab4b-0ae703b9ecd7)
+(def article (rf/subscribe [:article id]))
+
+(-> @article :content)
 
 (defn render [{:keys [id data tmpl on-change content]}]
-  ;; (rf/dispatch [::update id tmpl])
-  (println "tmpl is " data tmpl content)
-  [root-tmpl {;; :data @data
-              :template  rk/template
-              :on-change (partial content! id)
-              :content content}]
-  ;; (case tmpl
-  ;;   :ranklist 
-  ;;   [:div "Could not parse article"])
-  )
+  (rf/dispatch [::update id tmpl])
+  (case tmpl
+    (or :ranklist :examlist) [root-tmpl {:template  rk/template
+                                         :data @data
+                                         :on-change (partial content! id)
+                                         :content @content}]
+    :blog [root-tmpl {:template rk/article-template
+                      :data @data
+                      :on-change (partial content! id)
+                      :content @content}]
+    [:div "Could not parase article"]))
 
 (defn progress-info
   "element to state wether the article was saved or not"
@@ -93,15 +107,20 @@
     [:div>div.alert {:class class
                      :role "alert"} value]))
 
+
 (rf/reg-event-db
  :data-change 
- (fn [db [_ id file-data]]
-   (println "content is file " file-data)
-   (update-in db
-              [:articles id :content]
-              #(cond-> %
-                 (some? file-data)  (conj [:section.exam-list
-                                           (map-indexed rk/data-tmpl file-data)])))))
+ (fn [db [_ {:keys [id file-data template]}]]
+   (println "data change" id template)
+   (let [map-fn (case template
+                  :ranklist rk/data-tmpl
+                  :examlist rk/engg-list-tmpl
+                  rk/data-tmpl)]
+     (update-in db
+                [:articles id :content]
+                #(cond-> %
+                   (some? file-data)  (conj [:section.exam-list
+                                             (map-indexed map-fn file-data)]))))))
 
 (defn inline-editor
   "fun is the template fn and id is articles id..
@@ -111,11 +130,12 @@
                post-status (rf/subscribe [:new/post-status])
                article  (rf/subscribe [:article (keyword id)])
                content (rf/subscribe [:article-content (keyword id)])]
-    (println "Article id is " (keyword id) content)
+    (println "Article id is " (keyword id))
     [:div
      [:section.section>div.container [files/view {:type :datasource
                                                   :id ::new
-                                                  :dispatch [:data-change (keyword id)]
+                                                  :dispatch [:data-change {:id (keyword id)
+                                                                           :template (keyword fun)}]
                                                   :process csv->map
                                                   :placeholder "Add a datasource"}]]
      [:section.section>div.container
@@ -145,9 +165,11 @@
     [:div>section.section>div.columns
      (for [{:keys [voidwalker.template/fun]} @tmpls]
        [:div.column.is-one-quarter>div.box.template
-        {:on-click #(rf/dispatch [:navigate {:route :voidwalker.template.edit 
+        {:key fun
+         :on-click #(rf/dispatch [:navigate {:route :voidwalker.template.edit 
                                              :params {:fun fun
-                                                      :id :voidwalker.content.ui/new}}])}
+                                                      :id :voidwalker.content.ui/new}
+                                             :perform? true}])}
         (name fun)])]))
 
 

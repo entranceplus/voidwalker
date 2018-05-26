@@ -31,14 +31,22 @@
                                                           :c value}}))
         (into {})))
 
-
 (defn gen-datasource-map [csv]
   (->> (csv-data->maps csv)
        (map process-row)))
 
+(defn read-normalized-csv
+  "try with crlf if not able to parse then with ;f"
+  [file-content]
+  (let [csv (read-csv file-content :newline :cr+lf)]
+    (if (= 1 (count csv))
+      (read-csv file-content :newline :lf)
+      csv)))
+
 (defn csv->map
   [file-content]
+  (println "file content received for processing to map " file-content)
   (-> file-content
-      (read-csv  :newline :cr+lf)
+      read-normalized-csv
       gen-datasource-map
       doall))
