@@ -73,7 +73,6 @@
 (rf/reg-event-db
  ::update
  (fn [db [_ id tmpl]]
-   (println "updating are " id tmpl)
    (assoc-in db [:articles id :tmpl] tmpl)))
 
 (def tmpl :ranklist)
@@ -90,20 +89,19 @@
 (defn tinymce-editor
   [content {id :id}]
   (r/create-class {:should-component-update (fn [this [_ c0 _] [_ c1 _]]
-                                              (and (nil? c0) (some? c1)))
+                                              (and (nil? c0)
+                                                   (not= id :new)))
                    :display-name "tinymce-wrapper"
                    :reagent-render (fn [content {id :id}]
                                      [(r/adapt-react-class Editor)
                                       {:value (html content)
                                        :init  {"plugins" "link image table"
                                                "height" 200}
-                                       :on-change (fn [e]
-                                                    (println "on-change " )
-                                                    (rf/dispatch [:editor-change id  (->> e
-                                                                                          .-target
-                                                                                          .getContent
-                                                                                          html->hiccup
-                                                                                          (conj [:article.article-full]))]))}])}))
+                                       :on-editor-change (fn [content]
+                                                           (println "on-change " )
+                                                           (rf/dispatch [:editor-change id  (->> content
+                                                                                                 html->hiccup
+                                                                                                 (conj [:article.article-full]))]))}])}))
 
 (defn render [{:keys [id data tmpl on-change content]}]
   (rf/dispatch [::update id tmpl])
@@ -153,7 +151,6 @@
                post-status (rf/subscribe [:new/post-status])
                article  (rf/subscribe [:article (keyword id)])
                content (rf/subscribe [:article-content (keyword id)])]
-    (println "Article id is " (keyword id))
     [:div
      [:section.section>div.container [files/view {:type :datasource
                                                   :id ::new

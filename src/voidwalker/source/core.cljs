@@ -86,12 +86,12 @@
   (rf/dispatch [:delete-article id]))
 
 (defn article-view
-  [id title]
+  [id title tmpl]
   [:div.box {:key id}
    [:ul
     [nav-link {:route :voidwalker.template.edit
                :params {:id id
-                        :fun :ranklist}
+                        :fun (or tmpl :ranklist)}
                :text title}]
     [:span.icon.is-medium.is-pulled-right  {:on-click #(delete-post id)}
      [:i.fas.fa-trash-alt]]]])
@@ -99,7 +99,7 @@
 (defn home-page []
   [:section.section>div.container
    [:h1.title "List of Posts"]
-   (for [[id {:keys [title]}] @(rf/subscribe [:articles])]
-     (article-view id title))])
+   (for [[id {:keys [title tmpl]}] @(rf/subscribe [:articles])]
+     (article-view id title tmpl))])
 
 
