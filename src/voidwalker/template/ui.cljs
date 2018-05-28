@@ -98,12 +98,12 @@
                                        :init  {"plugins" "link image table"
                                                "height" 200}
                                        :on-change (fn [e]
-                                                    (println "on-change")
-                                                    (rf/dispatch [:editor-change id  (-> e
-                                                                                         .-target
-                                                                                         .getContent
-                                                                                         html->hiccup
-                                                                                         )]))}])}))
+                                                    (println "on-change " )
+                                                    (rf/dispatch [:editor-change id  (->> e
+                                                                                          .-target
+                                                                                          .getContent
+                                                                                          html->hiccup
+                                                                                          (conj [:article.article-full]))]))}])}))
 
 (defn render [{:keys [id data tmpl on-change content]}]
   (rf/dispatch [::update id tmpl])
