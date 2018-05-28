@@ -8,7 +8,8 @@
             [hickory.core :as h]
             [voidwalker.template.ranklist :as rk]
             [voidwalker.source.csv :refer [csv->map]]
-            [cljs.js :refer [eval empty-state js-eval]]))
+            [cljs.js :refer [eval empty-state js-eval]]
+            ["@tinymce/tinymce-react" :refer (Editor)]))
 
 
 (rf/reg-sub
@@ -37,13 +38,15 @@
 ;; used to hold refs to the editable document
 (def editor-component (r/atom 1))
 
-(defn set-content [editor-component]
-  (->> (.-innerHTML editor-component)
+(defn html->hiccup [html]
+  (->> html
        h/parse-fragment
        (map h/as-hiccup)
-       first))
+       (conj [:div])))
 
-(def *editor-content* (fn [] (some-> @editor-component set-content)))
+(def *editor-content* (fn [] (some-> @editor-component
+                                    .-innerHTML
+                                    html->hiccup)))
 
 (defn root-tmpl [{:keys [template on-change content]}]
   ;; (on-change)
@@ -79,6 +82,29 @@
 
 (-> @article :content)
 
+;; [root-tmpl {:template rk/article-template
+;;             :data @data
+;;             :on-change (partial content! id)
+;;             :content @content}]
+
+(defn tinymce-editor
+  [content {id :id}]
+  (r/create-class {:should-component-update (fn [this [_ c0 _] [_ c1 _]]
+                                              (and (nil? c0) (some? c1)))
+                   :display-name "tinymce-wrapper"
+                   :reagent-render (fn [content {id :id}]
+                                     [(r/adapt-react-class Editor)
+                                      {:value (html content)
+                                       :init  {"plugins" "link image table"
+                                               "height" 200}
+                                       :on-change (fn [e]
+                                                    (println "on-change")
+                                                    (rf/dispatch [:editor-change id  (-> e
+                                                                                         .-target
+                                                                                         .getContent
+                                                                                         html->hiccup
+                                                                                         )]))}])}))
+
 (defn render [{:keys [id data tmpl on-change content]}]
   (rf/dispatch [::update id tmpl])
   (case tmpl
@@ -86,10 +112,7 @@
                                          :data @data
                                          :on-change (partial content! id)
                                          :content @content}]
-    :blog [root-tmpl {:template rk/article-template
-                      :data @data
-                      :on-change (partial content! id)
-                      :content @content}]
+    :blog [tinymce-editor @content {:id id}]
     [:div "Could not parase article"]))
 
 (defn progress-info

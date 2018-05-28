@@ -44,11 +44,11 @@
 ;; (def data @(rf/subscribe [:snow.files.ui/files :articles :voidwalker.template.ui/new :datasource]))
 
 (defn article-template [content] 
-  [:article.article-full (or content
-                             [:div
-                              [:h1.heading "Title"]
-                              [:p.sub-heading "Description"]
-                              [:p.article-content "Some content goes here"]])])
+  [:section [:article.article-full (or content
+                                       [:div
+                                        [:h1.heading "Title"]
+                                        [:p.sub-heading "Description"]
+                                        [:p.article-content "Some content goes here"]])]])
 
 
 (defn template  
