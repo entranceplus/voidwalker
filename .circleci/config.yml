@@ -21,8 +21,8 @@ jobs:
       - checkout
       - restore_cache:
           key: voidwalker-{{checksum "deps.edn"}}
-      - run: npm i -g shadow-cljs
-      - run: npm i
+      - run: sudo npm i -g shadow-cljs
+      - run: sudo npm i
       - run: clj -Atest
       - save_cache:
           paths:
