@@ -34,14 +34,11 @@
 
 (s/check-asserts true)
 
-(def a nil)
-
 (defn transact-data
   [conn spec data]
   ;; {:pre [(s/valid? spec data)]}
   (info "data to be inserted in is " conn spec (keys data))
   (let [id (-> (u/uuid) keyword)]
-    (def a (assoc-in a [spec id] data))
     {:status (<!! (k/assoc-in conn [spec id] data))
      :id id}))
 
