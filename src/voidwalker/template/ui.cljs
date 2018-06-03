@@ -101,8 +101,7 @@
                                        :on-editor-change (fn [content]
                                                            (println "on-change " )
                                                            (rf/dispatch [:editor-change id  (->> content
-                                                                                                 html->hiccup
-                                                                                                 (conj [:article.article-full]))]))}])}))
+                                                                                                 html->hiccup)]))}])}))
 
 (defn render [{:keys [id data tmpl on-change content]}]
   (rf/dispatch [::update id tmpl])
