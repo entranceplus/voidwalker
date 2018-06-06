@@ -9,9 +9,9 @@
             [voidwalker.template.ranklist :as rk]
             [voidwalker.source.csv :refer [csv->map]]
             [voidwalker.images.core :as i]
+            [voidwalker.images.thumbnail :as thumb]
             [cljs.js :refer [eval empty-state js-eval]]
             ["@tinymce/tinymce-react" :refer (Editor)]))
-
 
 (rf/reg-sub
  :voidwalker.template/tmpl
@@ -158,6 +158,7 @@
                                                                            :template (keyword fun)}]
                                                   :process csv->map
                                                   :placeholder "Add a datasource"}]]
+     [thumb/ui (keyword id)]
      [i/image]
      [:section.section>div.container
       [ui/rx-input {:db-key [:articles

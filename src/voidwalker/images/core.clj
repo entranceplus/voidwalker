@@ -12,6 +12,12 @@
              :url (s3/upload n {:content content
                                 :binary true})}))
      doall))
+(def k nil)
+
+(rf/reg-fx ::upload (fn [{images :images [e data] :on-success}]
+                      (println "e is " e " data is " data " images us ")
+                      (rf/dispatch [e (merge data
+                                             {:urls (upload images)})])))
 
 (rf/reg-event-fx
  ::added

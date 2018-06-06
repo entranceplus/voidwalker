@@ -18,7 +18,7 @@
                      logf tracef debugf infof warnf errorf fatalf reportf
                      spy get-env]]))
 
-(defn get-conn [] (-> (r/system) :voidwalker.systems/conn :store))
+(defn get-conn [] (-> (r/system) second :voidwalker.systems/conn :store))
 
 (s/def ::url string?)
 (s/def ::content string?)
@@ -99,8 +99,32 @@
 
 ;; (<!! (k/assoc-in (get-conn) [::abc "def"] "abc"))
 ;; (<!! (k/get-in (get-conn) [::abc "def"]))
-#_(count (<!! (k/get-in (get-conn) [::post])))
-;; (<!! (k/update-in (get-conn) [::post "f95d9619-6908-4473-9bf3-b79a028b8b8e"] {:name "a"}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; nested article migration ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (def post (-> (get-conn)
+;;              (k/get-in  [::post :6fb153f6-c065-4949-b392-3cbe5b05e4f0])
+;;              <!!))
+
+;; (def c (-> post :content))
+
+;; (let [c ]
+;;   [:div c]) 
+
+
+;; (defn fix-for-nested-article [{content :content :as p}]
+;;   (assoc p :content (-> content second first (nth 3) (nth 3) rest rest (conj :div) vec)))
+
+;; (fix-for-nested-article post)
+
+
+
+
+#_(<!! (k/update-in (get-conn)
+                    [::post :6fb153f6-c065-4949-b392-3cbe5b05e4f0]
+                    fix-for-nested-article))
 ;; (def get-stuff (get-post (get-conn) {:id "26df8057-9501-466f-81f6-3249a2936240"}))
 
 ;; (def id  "26df8057-9501-466f-81f6-3249a2936240")
@@ -191,10 +215,10 @@
 
 (defn get-templated-post [store]
   (->> (get-all-posts store)
-     (map (fn [post]
-            (if (some? (:datasource post))
-              (parse-post post root-tmpl)
-              post)))))
+       (map (fn [post]
+              (if (some? (:datasource post))
+                (parse-post post root-tmpl)
+                post)))))
 
 
 ;; (->> (get-templated-post (get-conn))
@@ -214,7 +238,7 @@
 
 (defn send-response [response]
   (-> response
-     (response/header "Content-Type" "application/json; charset=utf-8")))
+      (response/header "Content-Type" "application/json; charset=utf-8")))
 
 (defn upload-css
   "takes css-files with file-content and name and returns public url
