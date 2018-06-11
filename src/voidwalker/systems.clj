@@ -17,6 +17,7 @@
             [voidwalker.dispatch :refer [request-handler]]
             [voidwalker.template :as t]
             [voidwalker.images.core]
+            [voidwalker.images.thumbnail]
             [snow.comm.core :as comm]
             [taoensso.timbre :as timbre
              :refer [log  trace  debug  info  warn  error  fatal  report
