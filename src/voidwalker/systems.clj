@@ -57,6 +57,8 @@
                                                               {::t/name "Blog"
                                                                ::t/fun :blog}]}]}})))
 
+;; (rf/dispatch [:voidwalker/init])
+
 
 (defn system-config [config]
   [::site-endpoint (component/using (new-endpoint site)

@@ -19,9 +19,9 @@
 
 (reg-event-fx
  :voidwalker/init
- (fn [{:keys [db]} _]
+ (fn [{{db :db} :db} _]
    {::comm/request {:data [:voidwalker/init]}
-    :db db/default-db}))
+    :db (or db  db/default-db)}))
 
 (reg-event-fx
  ::comm/connected

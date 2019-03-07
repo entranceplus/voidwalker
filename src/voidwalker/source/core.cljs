@@ -15,6 +15,7 @@
             [voidwalker.source.util :refer [get-value]]
             [snow.files.ui :as file]
             [snow.ui.components :refer [input]]
+            
             [hickory.core :as h]
             [voidwalker.source.routes :refer [nav-link]]
             [voidwalker.source.csv :refer [csv->map]])
@@ -34,17 +35,18 @@
                :nav? true
                :image {:src "https://entranceplus.in/images/header/ep-logo-white.svg"
                        :width "112"
-                       :height "48"}}]]
+                       :height "48"}}]
                                         ;
                                         ; [:div {:class (when (= @(rf/subscribe [:page]) :add
                                         ;                             "is-active"))}
-   [:div.navbar-menu>div.navbar-start
-    [nav-link {:route :voidwalker.template
-               :text "Templates"
-               :nav? true}]
-    [nav-link {:route :voidwalker.inline-editor
-               :text "Inline editor"
-               :nav? true}]]])
+    [:div.navbar-item [nav-link {:route :voidwalker.template
+                                 :text "Templates"
+                                 :class "nav-link"
+                                 :nav? true}]]
+    [:div.navbar-item [nav-link {:route :voidwalker.inline-editor
+                                 :text "Inline editor"
+                                 :class "nav-link"
+                                 :nav? true}]]]])
 
 (def fcon (r/atom {:id 1}))
 

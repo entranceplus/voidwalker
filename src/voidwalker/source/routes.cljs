@@ -1,7 +1,7 @@
 (ns voidwalker.source.routes
   (:require [re-frame.core :as rf]))
 
-(def route-map {:voidwalker.home "/home"
+(def route-map {:voidwalker.home "/"
                 ;; :voidwalker.edit "/edit/:id"
                 :voidwalker.template "/template"
                 :voidwalker.template.edit "/template/edit/:fun/:id"

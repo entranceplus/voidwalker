@@ -5,26 +5,17 @@ Voidwalker is a simple cms.
 
 ## Prerequisites
 
-Install `boot` and `shadow-cljs`
+Install `clj`
 
 ## Setup
-
-* Install postgresql
 * create your profiles.edn (todo write spec for config)
-* secreate db with those credentials
-* run resources/migration.sql
 
 ## Running
 
 Running clj
 
 ```shell
-boot dev
-```
-
-Compiling cljs
-```shell
-shadow-cljs watch app
+clj -A:dev:cljs -m user.core
 ```
 
 ## License

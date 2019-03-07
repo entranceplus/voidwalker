@@ -13,7 +13,7 @@ profiles.clj
 /log
 /node_modules
 .mach
-resources/public/js/out/
+resources/public/js
 .cpcache
 .shadow-cljs
 package-lock.json
@@ -22,3 +22,4 @@ profiles.edn
 void-konserve
 package-lock.json
 cljs-test-runner-out
+voidwalker-local

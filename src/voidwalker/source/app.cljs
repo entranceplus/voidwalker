@@ -17,8 +17,8 @@
   [:div
    [v/navbar]
    (case route
-     :voidwalker.home [v/home-page]
-     :voidwalker.template [t/template-view]
+     :voidwalker.home          [v/home-page]
+     :voidwalker.template      [t/template-view]
      :voidwalker.template.edit [t/inline-editor (:fun params) (:id params)]
      :voidwalker.inline-editor [i/page ])])
 
@@ -27,9 +27,9 @@
   "A function which will be called on each route change."
   [route params query]
   (println "Route change to: " route params query)
-  (rf/dispatch-sync  [:navigate {:route route
-                                 :params  params
-                                 :perform? false}])
+  (rf/dispatch  [:navigate {:route route
+                            :params  params
+                            :perform? false}])
   (r/render [page route params] 
             (js/document.getElementById "app")))
 

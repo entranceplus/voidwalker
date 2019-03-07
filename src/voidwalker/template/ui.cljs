@@ -45,9 +45,9 @@
        (map h/as-hiccup)
        (conj [:div])))
 
-(def *editor-content* (fn [] (some-> @editor-component
-                                    .-innerHTML
-                                    html->hiccup)))
+(def ^:dynamic *editor-content* (fn [] (some-> @editor-component
+                                              .-innerHTML
+                                              html->hiccup)))
 
 (defn root-tmpl [{:keys [template on-change content]}]
   ;; (on-change)

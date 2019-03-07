@@ -1,7 +1,7 @@
 (ns voidwalker.source.util
   (:require [bide.core :as b]))
 
-(defn *p* [whatever]
+(defn p [whatever]
   (println "from whatever" whatever)
   whatever)
 
