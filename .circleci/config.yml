@@ -23,7 +23,7 @@ jobs:
           key: voidwalker-{{checksum "deps.edn"}}
       - run: sudo npm i -g shadow-cljs
       - run: sudo npm i
-      - run: clj -Atest
+      - run: clojure -Atest
       - save_cache:
           paths:
             - /root/.m2
