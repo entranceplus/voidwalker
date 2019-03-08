@@ -34,8 +34,8 @@
             (js/document.getElementById "app")))
 
 (defn main []
-  (println "At least main! called ")
-  (comm/start!)
+  (println "At least main! called " (.getAttribute js/document.body "csrf-token"))
+  (comm/start! (.getAttribute js/document.body "data-csrf-token"))
   (rf/dispatch-sync [:initialize-db])
   (rf/clear-subscription-cache!)
   (router/start! route-map on-navigate))

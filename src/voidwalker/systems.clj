@@ -6,9 +6,13 @@
             [ring.middleware.defaults :refer [wrap-defaults
                                               site-defaults
                                               api-defaults]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.params :as params]
             [ring.middleware.resource :refer [wrap-resource]]
+            [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [ring.middleware.content-type :refer [wrap-content-type]]
+            [ring.middleware.anti-forgery :as anti-forgery]
             [re-frame.core :as rf]
             [taoensso.sente.server-adapters.immutant :refer (get-sch-adapter)]
             [snow.db :as db]
@@ -33,6 +37,8 @@
              [handler :refer [new-handler]]
              [konserve :refer [new-konserve]]
              [sente :refer [new-channel-socket-server sente-routes]])))
+
+
 
 (def rest-middleware
   (fn [handler]
@@ -66,19 +72,29 @@
    ::conn (new-konserve :type :filestore :path (config :db-path))
    ::api-endpoint (component/using (new-endpoint content-routes)
                                    [::api-middleware ::conn])
-   ::site-middleware (new-middleware {:middleware [[wrap-defaults site-defaults]]})
+   ::site-middleware (new-middleware {:middleware [wrap-session
+                                                   anti-forgery/wrap-anti-forgery
+                                                   params/wrap-params
+                                                   wrap-keyword-params
+                                                   [wrap-resource "public"]]})
+   :middleware (new-middleware {:middleware [wrap-session
+                                             anti-forgery/wrap-anti-forgery
+                                             params/wrap-params
+                                             wrap-keyword-params
+                                             [wrap-resource "public"]]})
    ::api-middleware (new-middleware
                      {:middleware  [rest-middleware
-                                    [wrap-defaults api-defaults]]})
+                                    [wrap-defaults api-defaults]
+                                    ]})
    ::sente-endpoint (component/using
                      (new-endpoint comm/sente-routes)
-                     [::comm/comm ::site-middleware])
+                     [::site-middleware ::comm/comm ])
    ::comm/comm (component/using (comm/new-comm comm/event-msg-handler
                                                comm/broadcast
                                                request-handler)
                                 [::conn])
    ::broadcast-enabled?_ (atom true)
-   ::handler (component/using (new-handler) [::sente-endpoint ::api-endpoint ::site-endpoint])
+   ::handler (component/using (new-handler) [::sente-endpoint ::api-endpoint ::site-endpoint :middleware])
    ::api-server (component/using (new-immutant-web :port (system/get-port config ::http-port))
                                  [::handler])])
 
