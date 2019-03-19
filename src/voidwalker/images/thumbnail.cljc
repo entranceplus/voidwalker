@@ -52,7 +52,7 @@
  (fn [db _] (::uploading db)))
 
 #?(:cljs (defn ui [id]
-           [:div.container
+           [:section.section>div.container
             [:div.columns
              [:div.column [files/file-input {:id id
                                              :placeholder "Add thumbnail."

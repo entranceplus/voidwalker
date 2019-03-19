@@ -236,3 +236,7 @@ input:focus {
 .template:hover {
     
 }
+
+.tags .tag:not(:last-child) {
+    margin-right: .5rem;
+}

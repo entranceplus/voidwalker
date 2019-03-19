@@ -4,7 +4,7 @@
             [cljs.tools.reader :refer [read-string]]
             [reagent.core :as r]
             [snow.files.ui :as files]
-            [snow.ui.components :as ui]
+            [voidwalker.components :as ui]
             [hickory.core :as h]
             [voidwalker.template.ranklist :as rk]
             [voidwalker.source.csv :refer [csv->map]]
@@ -143,6 +143,18 @@
                    (some? file-data)  (conj [:section.exam-list
                                              (map-indexed map-fn file-data)]))))))
 
+(rf/reg-sub
+ ::tags
+ (fn [db [_ id]]
+   (get-in db [:articles id :tags])))
+
+
+
+(rf/reg-event-db
+ ::set-tags
+ (fn [db [_ tags id]]
+   (assoc-in db [:articles id :tags] tags)))
+
 (defn inline-editor
   "fun is the template fn and id is articles id..
   both are strings and have to be converted to keyword eventually"
@@ -150,8 +162,33 @@
   (r/with-let [file-data (rf/subscribe [::files/files ::new :datasource])
                post-status (rf/subscribe [:new/post-status])
                article  (rf/subscribe [:article (keyword id)])
-               content (rf/subscribe [:article-content (keyword id)])]
+               content (rf/subscribe [:article-content (keyword id)])
+               tags (rf/subscribe [::tags (keyword id)])]
     [:div
+     [:section.section>div.container
+      [ui/rx-input {:db-key [:articles
+                             (keyword id)
+                             :url]
+                    :placeholder "Enter url"}]
+      [ui/rx-input {:db-key [:articles
+                             (keyword id)
+                             :title]
+                    :placeholder "Enter title"}]
+      [:div.tags.is-medium (map (fn [t] [:span.tag.is-primary {:key t} t]) @tags)]
+      [ui/input {:on-change (fn [v]
+                              (rf/dispatch [::set-tags
+                                            (clojure.string/split v #",")
+                                            (keyword id)]))
+                 :value @tags
+                 :placeholder "Enter tags (separated by comma (,))"}]]
+     
+     
+     [:section.section>div.container [render {:id (keyword id)
+                                              :tmpl (or (:tmpl @article)
+                                                        (keyword fun))
+                                              :data file-data
+                                              :content content}]]
+
      [:section.section>div.container [files/view {:type :datasource
                                                   :id ::new
                                                   :dispatch [:data-change {:id (keyword id)
@@ -161,24 +198,10 @@
      [thumb/ui (keyword id)]
      [i/image]
      [:section.section>div.container
-      [ui/rx-input {:db-key [:articles
-                             (keyword id)
-                             :url]
-                    :placeholder "Enter url"}]
-      [ui/rx-input {:db-key [:articles
-                             (keyword id)
-                             :title]
-                    :placeholder "Enter title"}]]
-     [:section.section>div.container
       [:div.button.is-medium.is-primary
        {:on-click #(rf/dispatch [:save-article (keyword id)])} "Save article"]
       [:div [progress-info @post-status]]]
-     
-     [:section.section>div.container [render {:id (keyword id)
-                                              :tmpl (or (:tmpl @article)
-                                                        (keyword fun))
-                                              :data file-data
-                                              :content content}]]]))
+     ]))
 
 (defn template-view
   "card view for selecting templates"

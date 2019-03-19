@@ -14,8 +14,6 @@
 
 (s/check-asserts true)
 
-(keys (repl/system))
-
 (defn -main [& args]
   (repl/start! system-config)
   (repl/start-nrepl)
